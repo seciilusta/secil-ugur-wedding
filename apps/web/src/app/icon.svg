@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="S&U">
+  <rect width="64" height="64" fill="#37332F"/>
+  <rect x="4.5" y="4.5" width="55" height="55" fill="none" stroke="#C6B08A" stroke-width="1"/>
+  <text x="32" y="43.5" text-anchor="middle" font-family="'Bodoni Moda','Didot','Times New Roman',serif" font-size="30" letter-spacing="-0.5" fill="#F7F5F1">S<tspan fill="#C6B08A">&amp;</tspan>U</text>
+</svg>

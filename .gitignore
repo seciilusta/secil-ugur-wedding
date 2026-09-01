@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# sqlite database files (never commit guest data)
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-wal
+*.db-shm
+services/rsvp-api/data/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# local preview artifacts
+screenshots/
+
+# Output of tools/verify.mjs
+.screenshots/

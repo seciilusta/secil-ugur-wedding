@@ -1,0 +1,22 @@
+{
+  "name": "secil-ugur-wedding",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Development-convenience root for the Seçil & Uğur wedding website (apps/web) and the standalone RSVP API (services/rsvp-api). Both applications are independently deployable.",
+  "packageManager": "pnpm@11.5.2",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/**\" --filter \"./services/**\" dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter rsvp-api dev",
+    "build": "pnpm --filter rsvp-api build && pnpm --filter web build",
+    "build:web": "pnpm --filter web build",
+    "build:api": "pnpm --filter rsvp-api build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter rsvp-api db:migrate"
+  }
+}
