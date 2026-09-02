@@ -11,17 +11,17 @@ export function Hero() {
       <div aria-hidden className="hero-light" />
 
       <EntranceMotion entrance="soft-scale" trigger="mount" delay={0.05} className="hero-venue-art">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={artwork.illustration}
-          srcSet={artwork.illustrationSrcSet}
-          sizes="(min-width: 70rem) 74vw, 130vw"
-          width={artwork.illustrationWidth}
-          height={artwork.illustrationHeight}
-          alt=""
-          fetchPriority="high"
-          decoding="async"
-        />
+        <picture>
+          <source media="(max-width: 69.999rem)" srcSet={artwork.heroMobile.src} />
+          <img
+            src={artwork.heroDesktop.src}
+            width={artwork.heroDesktop.width}
+            height={artwork.heroDesktop.height}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+          />
+        </picture>
       </EntranceMotion>
 
       <BotanicalDrift className="hero-botanical hero-botanical-left" direction={-1}>

@@ -435,19 +435,22 @@
   .hero-venue-art {
     position: absolute;
     z-index: -3;
-    right: -10vw;
-    bottom: -3vh;
-    width: min(82vw, 88rem);
+    inset: 0;
+    width: 100%;
+    height: 100%;
     transform-origin: 70% 70%;
-    opacity: 0.72;
-    filter: saturate(0.72) sepia(0.08) contrast(0.92);
-    mix-blend-mode: multiply;
+    opacity: 0.94;
   }
 
+  .hero-venue-art picture,
   .hero-venue-art img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+  }
+
+  .hero-venue-art img {
+    object-fit: cover;
   }
 
   .hero-botanical {
@@ -742,10 +745,7 @@
       font-size: clamp(4rem, 9.8vw, 7rem);
     }
 
-    .hero-venue-art {
-      right: -26vw;
-      width: 105vw;
-    }
+    .hero-venue-art { opacity: 0.93; }
   }
 
   @media (max-width: 47.999rem) {
@@ -835,10 +835,9 @@
     }
 
     .hero-venue-art {
-      right: -43vw;
-      bottom: 17vh;
-      width: 154vw;
-      opacity: 0.58;
+      inset: 0;
+      width: 100%;
+      opacity: 0.9;
     }
 
     .hero-botanical-left {
@@ -1122,19 +1121,16 @@
   .venue-art-crop {
     position: absolute;
     z-index: -2;
-    top: 2rem;
-    right: -13vw;
-    width: min(82vw, 78rem);
-    opacity: 0.42;
-    filter: saturate(0.55) contrast(0.92);
-    mix-blend-mode: multiply;
+    top: 0;
+    right: -4vw;
+    width: min(76vw, 76rem);
+    opacity: 0.84;
   }
 
   .venue-art-crop img {
+    display: block;
     width: 100%;
     height: auto;
-    transform: scale(1.18);
-    transform-origin: 68% 45%;
   }
 
   .venue-grid {
@@ -1208,28 +1204,6 @@
     height: 100%;
     border: 0;
     filter: sepia(0.18) saturate(0.72) contrast(0.92);
-  }
-
-  .venue-map-placeholder {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    padding: 2rem;
-    text-align: center;
-  }
-
-  .venue-map-placeholder > span {
-    width: 1px;
-    height: 3rem;
-    margin-bottom: 1.2rem;
-    background: var(--color-champagne);
-  }
-
-  .venue-map-placeholder small {
-    margin-top: 0.45rem;
-    color: color-mix(in srgb, var(--color-charcoal) 48%, transparent);
   }
 
   .rsvp-dusk {
@@ -1450,14 +1424,19 @@
     }
 
     .venue-composition::after {
-      background: linear-gradient(180deg, var(--color-beige) 0 45%, transparent 80%);
+      background: linear-gradient(
+        90deg,
+        var(--color-beige) 0 38%,
+        color-mix(in srgb, var(--color-beige) 86%, transparent) 58%,
+        transparent 90%
+      );
     }
 
     .venue-art-crop {
-      top: 15rem;
-      right: -58vw;
-      width: 165vw;
-      opacity: 0.32;
+      top: 12rem;
+      right: -40vw;
+      width: 154vw;
+      opacity: 0.9;
     }
 
     .venue-grid {

@@ -67,20 +67,24 @@ export const site = {
 
   artwork: {
     /**
-     * Optimized display copies of the venue illustration, all produced from the
-     * archival original by `pnpm --filter web artwork`. The larger two are
-     * Lanczos resamples offered through srcset for high-density screens.
+     * Art-directed, lossless derivatives of the canonical RGBA master. They are
+     * cropped and positioned for their destination, never redrawn or filtered.
      */
-    illustration: "/artwork/venue-illustration.webp",
-    illustrationSrcSet:
-      "/artwork/venue-illustration.webp 682w, /artwork/venue-illustration@1.5x.webp 1023w, /artwork/venue-illustration@2x.webp 1364w",
-    /**
-     * Intrinsic pixel size of the native display copy. Declared so the browser
-     * reserves the right box before the image arrives and the illustration never
-     * causes layout shift. Matches `public/artwork/venue-illustration.json`.
-     */
-    illustrationWidth: 682,
-    illustrationHeight: 416,
+    heroDesktop: {
+      src: "/artwork/venue-hero-desktop-master.webp",
+      width: 1600,
+      height: 1000,
+    },
+    heroMobile: {
+      src: "/artwork/venue-hero-mobile-master.webp",
+      width: 900,
+      height: 1800,
+    },
+    venueDetail: {
+      src: "/artwork/venue-detail-master.webp",
+      width: 1200,
+      height: 1000,
+    },
     illustrationAlt:
       "Aden Boğazköy Tesisleri'nin cam yapısını, ivory drapeleri ve beyaz çiçekli bahçesini gösteren suluboya illüstrasyon",
     botanical: "/artwork/botanical-branch.webp",
@@ -132,9 +136,6 @@ export const site = {
     directionsLabel: "Google Maps'te Yol Tarifi Al",
     /** Accessible title for the embedded map iframe. */
     mapTitle: "Aden Boğazköy Tesisleri konumunu gösteren Google Haritalar haritası",
-    /** Shown in place of the map while `maps.embedUrl` is still empty. */
-    mapPlaceholder: "Harita bağlantısı henüz eklenmedi.",
-    mapPlaceholderHint: "site.ts içindeki maps.embedUrl alanını doldurun.",
   },
 
   /* ------------------------------------------------------------------ rsvp */
@@ -216,12 +217,13 @@ export const site = {
    *                 `src="…"` value from the generated iframe and paste it here.
    * `directionsUrl` Google Maps → the venue → Directions → Share → copy the link.
    *
-   * While `embedUrl` is empty the venue section shows a tasteful placeholder and
-   * keeps its layout. While `directionsUrl` is empty the directions link is hidden.
+   * When `embedUrl` is empty no map or placeholder card is rendered. When
+   * `directionsUrl` is empty the directions link is hidden.
    */
+
   maps: {
-    embedUrl: "",
-    directionsUrl: "",
+    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.144942140483!2d28.982248375473733!3d41.01591617414719!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab97532631e4f%3A0x64b024205723270d!2sAden%20Bo%C4%9Fazk%C3%B6y%20Tesisleri!5e0!3m2!1str!2str!4v1720071162130!5m2!1str!2str",
+    directionsUrl: "https://www.google.com/maps?saddr=My+Location&daddr=Aden+Boğazköy+Tesisleri,+Boğazköy+İstiklal,+Arnavutköy+Habibler+Yolu+No:1266,+34275+Arnavutköy%2Fİstanbul/",
   },
 
   /* -------------------------------------------------------------- metadata */

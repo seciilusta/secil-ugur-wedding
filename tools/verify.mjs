@@ -273,6 +273,8 @@ const MEASURE = `(() => {
   const cb = countdown && countdown.getBoundingClientRect();
   const map = document.querySelector('#mekan .venue-map');
   const mb = map && map.getBoundingClientRect();
+  const venueDetail = document.querySelector('#mekan .venue-art-crop img');
+  const vdb = venueDetail && venueDetail.getBoundingClientRect();
   /* The honeypot is parked off-screen and is never focused or tapped, so it is
      excluded from the touch-target and font-size checks. */
   const controls = [...document.querySelectorAll('#katilim .field-input, #katilim label.choice, #katilim button[type=submit]')]
@@ -295,6 +297,11 @@ const MEASURE = `(() => {
     },
     heroAboveFold: cb && hb ? (hb.bottom <= de.clientHeight + 1 && cb.bottom <= de.clientHeight) : null,
     mapAspect: mb && Number((mb.width / mb.height).toFixed(3)),
+    venueDetail: vdb && {
+      w: Math.round(vdb.width), h: Math.round(vdb.height),
+      fileServed: (venueDetail.currentSrc || venueDetail.getAttribute('src') || '').split('/').pop(),
+    },
+    mapPlaceholderPresent: Boolean(document.querySelector('#mekan .venue-map-placeholder')),
     formControls: controls,
     smallestTypedFieldFontSize: typedFields.length ? Math.min(...typedFields.map(i => i.fontSize)) : null,
     smallestControlHeight: controls.length ? Math.min(...controls.map(i => i.h)) : null,
@@ -837,9 +844,14 @@ try {
       `${m.illustration?.pctOfViewportWidth}% of viewport width`,
     );
     check(
-      `${name}: map keeps its editorial 16:9 frame`,
-      Math.abs((m.mapAspect ?? 0) - 16 / 9) < 0.05,
-      String(m.mapAspect),
+      `${name}: venue uses the canonical detail asset without a placeholder card`,
+      m.venueDetail?.fileServed === "venue-detail-master.webp" && !m.mapPlaceholderPresent,
+      `${m.venueDetail?.fileServed ?? "missing detail"}; placeholder ${m.mapPlaceholderPresent}`,
+    );
+    check(
+      `${name}: hero loads the art-directed source for this breakpoint`,
+      m.illustration?.fileServed === (m.viewport.w < 1120 ? "venue-hero-mobile-master.webp" : "venue-hero-desktop-master.webp"),
+      m.illustration?.fileServed,
     );
     check(`${name}: timeline exposes all four real stops`, m.timelineStops === 4, `${m.timelineStops} stops`);
     check(

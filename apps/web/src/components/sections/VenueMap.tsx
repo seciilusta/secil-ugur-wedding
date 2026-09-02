@@ -11,18 +11,16 @@ export function VenueMap() {
       <EntranceMotion entrance="soft-scale" className="venue-art-crop">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={artwork.illustration}
-          srcSet={artwork.illustrationSrcSet}
-          sizes="(min-width: 48rem) 62vw, 135vw"
-          width={artwork.illustrationWidth}
-          height={artwork.illustrationHeight}
+          src={artwork.venueDetail.src}
+          width={artwork.venueDetail.width}
+          height={artwork.venueDetail.height}
           alt=""
           loading="lazy"
           decoding="async"
         />
       </EntranceMotion>
 
-      <div className="shell venue-grid">
+      <div className={`shell venue-grid ${hasEmbed ? "venue-grid-with-map" : "venue-grid-art-only"}`}>
         <EntranceMotion entrance="from-left" className="venue-copy">
           <p className="overline text-olive">{venueSection.overline}</p>
           <LineDraw className="editorial-line" delay={0.1} />
@@ -37,9 +35,9 @@ export function VenueMap() {
           ) : null}
         </EntranceMotion>
 
-        <EntranceMotion entrance="from-right" delay={0.14} className="venue-map-wrap">
-          <div className="venue-map">
-            {hasEmbed ? (
+        {hasEmbed ? (
+          <EntranceMotion entrance="from-right" delay={0.14} className="venue-map-wrap">
+            <div className="venue-map">
               <iframe
                 src={maps.embedUrl}
                 title={venueSection.mapTitle}
@@ -47,15 +45,9 @@ export function VenueMap() {
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
-            ) : (
-              <div className="venue-map-placeholder">
-                <span aria-hidden />
-                <p>{venueSection.mapPlaceholder}</p>
-                <small>{venueSection.mapPlaceholderHint}</small>
-              </div>
-            )}
-          </div>
-        </EntranceMotion>
+            </div>
+          </EntranceMotion>
+        ) : null}
       </div>
     </section>
   );

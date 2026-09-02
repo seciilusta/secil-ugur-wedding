@@ -75,16 +75,18 @@ targeting `[data-reveal]`. If you add a new reveal, keep that attribute on it.
 
 ## The illustration
 
-`public/artwork/source/venue-illustration.png` is the original and is never
-touched. `scripts/optimize-artwork.mjs` produces what the site loads:
+`public/artwork/source/wedding-illustration-master.png` is the canonical,
+byte-identical copy of the supplied original and is never modified in place.
+`scripts/optimize-artwork.mjs` deterministically produces the assets loaded by
+the site:
 
-- trims the transparent outer padding only, leaving the visible artwork intact
-- writes a lossless PNG master plus 1×/1.5×/2× transparent WebP copies, offered
-  through `srcset` so high-density screens get a sharp image
-- records intrinsic dimensions in `site.ts` so the box is reserved up front and
-  the illustration causes no layout shift
-- regenerates the Open Graph sharing image
+- a desktop hero composition with intentional space for the names
+- an independently composed mobile hero
+- a distinct entrance, roofline, and path detail for the venue section
+- the Open Graph sharing image and a provenance manifest
 
-A plain `<img>` is used rather than `next/image`, because static export cannot
-optimize images at request time and the custom `srcset` is more appropriate
-here than a generated one.
+The pipeline only crops, scales, and positions the original RGBA pixels on
+transparent canvases before writing lossless WebP files. It does not redraw,
+recolour, sharpen, posterize, or apply a stylistic filter. The legacy source
+files in the same directory are retained only for archive purposes and are not
+read by the pipeline or referenced by the website.

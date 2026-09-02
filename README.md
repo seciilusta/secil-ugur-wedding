@@ -444,23 +444,22 @@ frontend-side change.
 
 ## Replacing the venue illustration
 
-The original file is kept untouched in
-`apps/web/public/artwork/source/venue-illustration.png`. The copies the site
-actually loads are generated from it:
+The canonical RGBA artwork is kept untouched in
+`apps/web/public/artwork/source/wedding-illustration-master.png`. The
+destination-specific assets the site actually loads are generated from it:
 
 ```bash
 pnpm --filter web artwork
 ```
 
-The script trims the transparent outer padding without touching any visible
-part of the artwork, writes a lossless PNG master plus 1×/1.5×/2× transparent
-WebP copies for high-density screens, records the intrinsic dimensions so the
-layout reserves the correct box and never shifts, and regenerates the Open
-Graph sharing image.
+The script creates independent desktop hero, mobile hero and venue-detail
+compositions plus the Open Graph image. It only crops, scales and positions the
+source on transparent canvases, then writes lossless WebP files. It performs no
+colour correction, sharpening, alpha recovery or stylistic filtering.
 
-To use a different illustration, replace the file in `source/`, run the command
-above, and update `artwork.illustrationWidth` / `illustrationHeight` in
-`site.ts` if the script reports different dimensions.
+To use a different illustration, replace the canonical master and run the
+command above. Generated dimensions and provenance are recorded in
+`public/artwork/venue-assets.json`.
 
 ---
 
