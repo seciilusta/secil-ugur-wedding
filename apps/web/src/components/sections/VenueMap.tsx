@@ -3,24 +3,11 @@ import { site } from "@/config/site";
 
 export function VenueMap() {
   const { venue, venueSection, maps, artwork } = site;
-  const hasEmbed = maps.embedUrl.trim().length > 0;
   const hasDirections = maps.directionsUrl.trim().length > 0;
 
   return (
     <section id="mekan" className="venue-composition" aria-labelledby="venue-title">
-      <EntranceMotion entrance="soft-scale" className="venue-art-crop">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={artwork.venueDetail.src}
-          width={artwork.venueDetail.width}
-          height={artwork.venueDetail.height}
-          alt=""
-          loading="lazy"
-          decoding="async"
-        />
-      </EntranceMotion>
-
-      <div className={`shell venue-grid ${hasEmbed ? "venue-grid-with-map" : "venue-grid-art-only"}`}>
+      <div className="shell venue-grid">
         <EntranceMotion entrance="from-left" className="venue-copy">
           <p className="overline text-olive">{venueSection.overline}</p>
           <LineDraw className="editorial-line" delay={0.1} />
@@ -35,19 +22,19 @@ export function VenueMap() {
           ) : null}
         </EntranceMotion>
 
-        {hasEmbed ? (
-          <EntranceMotion entrance="from-right" delay={0.14} className="venue-map-wrap">
-            <div className="venue-map">
-              <iframe
-                src={maps.embedUrl}
-                title={venueSection.mapTitle}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-              />
-            </div>
+        <div className="venue-visual">
+          <EntranceMotion entrance="soft-scale" className="venue-art-crop">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={artwork.venueDetail.src}
+              width={artwork.venueDetail.width}
+              height={artwork.venueDetail.height}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
           </EntranceMotion>
-        ) : null}
+        </div>
       </div>
     </section>
   );

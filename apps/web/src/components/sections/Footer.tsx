@@ -1,4 +1,4 @@
-import { EntranceMotion, LineDraw } from "@/components/motion/Choreography";
+import { EntranceMotion } from "@/components/motion/Choreography";
 import { site } from "@/config/site";
 
 export function Footer() {
@@ -7,7 +7,6 @@ export function Footer() {
   return (
     <footer className="wedding-footer">
       <div className="shell">
-        <LineDraw className="footer-line" />
         <div className="footer-grid">
           <EntranceMotion entrance="from-left">
             <p className="footer-names">

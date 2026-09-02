@@ -39,7 +39,7 @@ const API_DIR = path.join(ROOT, "services/rsvp-api");
 const OUT_DIR = path.join(ROOT, ".screenshots");
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
-const WEB_PORT = 3000;
+const WEB_PORT = Number(process.env.VERIFY_WEB_PORT ?? 3000);
 const API_PORT = 4000;
 const WEB_URL = `http://localhost:${WEB_PORT}/`;
 
@@ -49,6 +49,10 @@ const WEB_URL = `http://localhost:${WEB_PORT}/`;
 const VERIFY_DB = path.join(ROOT, ".screenshots/verify-rsvp.sqlite");
 
 const shotsOnly = process.argv.includes("--shots");
+const SECTION_IDS = (process.env.VERIFY_SECTIONS ?? "davet,program,mekan,katilim")
+  .split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
 
 const VIEWPORTS = [
   /* Layout assertions care about CSS pixels. A 1x capture keeps the automated
@@ -271,10 +275,11 @@ const MEASURE = `(() => {
   const hb = hero && hero.getBoundingClientRect();
   const countdown = document.querySelector('.hero-countdown');
   const cb = countdown && countdown.getBoundingClientRect();
-  const map = document.querySelector('#mekan .venue-map');
-  const mb = map && map.getBoundingClientRect();
   const venueDetail = document.querySelector('#mekan .venue-art-crop img');
   const vdb = venueDetail && venueDetail.getBoundingClientRect();
+  const venueDetailFrame = document.querySelector('#mekan .venue-art-crop');
+  const vdfb = venueDetailFrame && venueDetailFrame.getBoundingClientRect();
+  const venueDetailStyle = venueDetail && getComputedStyle(venueDetail);
   /* The honeypot is parked off-screen and is never focused or tapped, so it is
      excluded from the touch-target and font-size checks. */
   const controls = [...document.querySelectorAll('#katilim .field-input, #katilim label.choice, #katilim button[type=submit]')]
@@ -296,12 +301,14 @@ const MEASURE = `(() => {
       artDirectedCrop: ib.left < -0.5 || ib.right > vw + 0.5
     },
     heroAboveFold: cb && hb ? (hb.bottom <= de.clientHeight + 1 && cb.bottom <= de.clientHeight) : null,
-    mapAspect: mb && Number((mb.width / mb.height).toFixed(3)),
     venueDetail: vdb && {
       w: Math.round(vdb.width), h: Math.round(vdb.height),
       fileServed: (venueDetail.currentSrc || venueDetail.getAttribute('src') || '').split('/').pop(),
+      aspect: Number((vdb.width / vdb.height).toFixed(3)),
+      containedInFrame: Boolean(vdfb && vdb.left >= vdfb.left - 1 && vdb.right <= vdfb.right + 1),
+      featheredSides: venueDetailStyle?.maskImage !== 'none',
     },
-    mapPlaceholderPresent: Boolean(document.querySelector('#mekan .venue-map-placeholder')),
+    venueMapPanelPresent: Boolean(document.querySelector('#mekan .venue-map, #mekan iframe')),
     formControls: controls,
     smallestTypedFieldFontSize: typedFields.length ? Math.min(...typedFields.map(i => i.fontSize)) : null,
     smallestControlHeight: controls.length ? Math.min(...controls.map(i => i.h)) : null,
@@ -321,6 +328,94 @@ const MEASURE = `(() => {
       const transform = getComputedStyle(el).transform;
       return transform === 'none' ? 1 : Number(new DOMMatrix(transform).d.toFixed(3));
     })()
+  };
+})()`;
+
+/* Every visual handoff is checked against the actual rendered layout. The
+   gradient check uses Chrome's resolved stop positions, so it catches the
+   Safari failure mode where mixed units cause later stops to be clamped onto
+   an earlier stop and create a hard horizontal colour line. */
+const CONTINUITY_PROBE = `(() => {
+  const rect = (selector) => {
+    const el = document.querySelector(selector);
+    if (!el) return null;
+    const box = el.getBoundingClientRect();
+    return {
+      top: box.top + scrollY,
+      right: box.right + scrollX,
+      bottom: box.bottom + scrollY,
+      left: box.left + scrollX,
+    };
+  };
+  const boundaries = [
+    ['hero → invitation', '.hero-artwork', '#davet'],
+    ['invitation → program', '#davet', '#program'],
+    ['program → venue', '#program', '#mekan'],
+    ['venue → RSVP', '#mekan', '#katilim'],
+    ['RSVP → footer', '#katilim', 'footer'],
+  ].map(([name, fromSelector, toSelector]) => {
+    const from = rect(fromSelector);
+    const to = rect(toSelector);
+    const fromStyle = document.querySelector(fromSelector) && getComputedStyle(document.querySelector(fromSelector));
+    const toStyle = document.querySelector(toSelector) && getComputedStyle(document.querySelector(toSelector));
+    return {
+      name,
+      connected: Boolean(from && to && Math.abs(from.bottom - to.top) <= 1),
+      fromBackgroundColor: fromStyle?.backgroundColor ?? null,
+      toBackgroundColor: toStyle?.backgroundColor ?? null,
+    };
+  });
+  const gradientStops = (selector) => {
+    const el = document.querySelector(selector);
+    if (!el) return { selector, missing: true };
+    const image = getComputedStyle(el).backgroundImage;
+    const match = image.match(/linear-gradient\\((.*)\\)$/);
+    const height = el.getBoundingClientRect().height;
+    const stops = [...(match?.[1] ?? '').matchAll(/(?:^|[,\\s])(-?\\d+(?:\\.\\d+)?)(px|%)(?=\\s*(?:,|\\)))/g)]
+      .map(([, value, unit]) => Number(value) * (unit === '%' ? height / 100 : 1));
+    return {
+      selector,
+      stops: stops.map((value) => Math.round(value * 100) / 100),
+      strictlyIncreasing: stops.every((value, index) => index === 0 || value > stops[index - 1]),
+    };
+  };
+  const venue = rect('#mekan');
+  const botanical = rect('.evening-botanical-upper');
+  const hero = rect('.hero-artwork');
+  const heroPaper = rect('.hero-paper');
+  const heroArtwork = rect('.hero-venue-art');
+  const heroPaperStyle = document.querySelector('.hero-paper') && getComputedStyle(document.querySelector('.hero-paper'));
+  const heroArtworkStyle = document.querySelector('.hero-venue-art') && getComputedStyle(document.querySelector('.hero-venue-art'));
+  const invitation = rect('#davet');
+  const program = rect('#program');
+  const invitationBotanicals = [...document.querySelectorAll('.invitation-botanical')].map((el) => {
+    const box = el.getBoundingClientRect();
+    return {
+      top: box.top + scrollY,
+      right: box.right + scrollX,
+      bottom: box.bottom + scrollY,
+      left: box.left + scrollX,
+    };
+  });
+  const invitationUsesOneLeftBotanicalBridge = Boolean(
+    invitation && program && invitationBotanicals.length === 1 &&
+    invitationBotanicals[0].left < invitation.left + (invitation.right - invitation.left) / 2 &&
+    invitationBotanicals[0].top >= invitation.top &&
+    invitationBotanicals[0].bottom > invitation.bottom + 1 &&
+    invitationBotanicals[0].bottom <= program.top + (program.bottom - program.top) * 0.55,
+  );
+  return {
+    boundaries,
+    gradients: [gradientStops('.light-experience'), gradientStops('.evening-experience')],
+    venueClearsIncomingEveningArtwork: Boolean(venue && botanical && venue.bottom <= botanical.top),
+    heroFadesIntoInvitation: Boolean(
+      hero && heroPaper && heroArtwork &&
+      heroPaper.bottom > hero.bottom + 1 &&
+      heroArtwork.bottom > hero.bottom + 1 &&
+      heroPaperStyle?.maskImage !== 'none' &&
+      heroArtworkStyle?.maskImage !== 'none',
+    ),
+    invitationUsesOneLeftBotanicalBridge,
   };
 })()`;
 
@@ -365,7 +460,11 @@ async function captureViewports(chrome, { suffix, reducedMotion }) {
     });
     writeFileSync(path.join(OUT_DIR, `${tag}-fold.png`), Buffer.from(shot.data, "base64"));
 
-    results[vp.name] = { ...measured, consoleOutput: [...chrome.logs] };
+    results[vp.name] = {
+      ...measured,
+      continuity: await chrome.evaluate(CONTINUITY_PROBE),
+      consoleOutput: [...chrome.logs],
+    };
   }
 
   return results;
@@ -450,7 +549,7 @@ async function loadForm(chrome, { missingConfig = false } = {}) {
  * it doubles as a check that every reveal does fire.
  */
 async function captureSections(chrome, viewport) {
-  const sections = ["davet", "program", "mekan", "katilim"];
+  const sections = SECTION_IDS;
   const results = {};
 
   await chrome.send("Emulation.setEmulatedMedia", { features: [] });
@@ -844,9 +943,16 @@ try {
       `${m.illustration?.pctOfViewportWidth}% of viewport width`,
     );
     check(
-      `${name}: venue uses the canonical detail asset without a placeholder card`,
-      m.venueDetail?.fileServed === "venue-detail-master.webp" && !m.mapPlaceholderPresent,
-      `${m.venueDetail?.fileServed ?? "missing detail"}; placeholder ${m.mapPlaceholderPresent}`,
+      `${name}: venue uses the approved interior asset with no map panel`,
+      m.venueDetail?.fileServed === "venue-interior-approved.png" && !m.venueMapPanelPresent,
+      `${m.venueDetail?.fileServed ?? "missing detail"}; map panel ${m.venueMapPanelPresent}`,
+    );
+    check(
+      `${name}: venue artwork keeps its full aspect ratio inside a feathered frame`,
+      Math.abs((m.venueDetail?.aspect ?? 0) - 1.5) <= 0.01 &&
+        m.venueDetail?.containedInFrame === true &&
+        m.venueDetail?.featheredSides === true,
+      JSON.stringify(m.venueDetail),
     );
     check(
       `${name}: hero loads the art-directed source for this breakpoint`,
@@ -871,6 +977,24 @@ try {
     );
     check(`${name}: no console errors`, m.consoleOutput.every((l) => l.level !== "error" && l.level !== "exception"),
       JSON.stringify(m.consoleOutput.filter((l) => l.level === "error" || l.level === "exception")));
+    for (const boundary of m.continuity.boundaries) {
+      check(`${name}: ${boundary.name} has no layout gap`, boundary.connected);
+      check(
+        `${name}: ${boundary.name} does not add an opaque section canvas`,
+        boundary.fromBackgroundColor === "rgba(0, 0, 0, 0)" && boundary.toBackgroundColor === "rgba(0, 0, 0, 0)",
+        `${boundary.fromBackgroundColor} → ${boundary.toBackgroundColor}`,
+      );
+    }
+    for (const gradient of m.continuity.gradients) {
+      check(
+        `${name}: ${gradient.selector} gradient stops are strictly increasing`,
+        !gradient.missing && gradient.strictlyIncreasing,
+        gradient.missing ? "missing" : gradient.stops.join(" < "),
+      );
+    }
+    check(`${name}: venue clears incoming evening artwork`, m.continuity.venueClearsIncomingEveningArtwork);
+    check(`${name}: hero artwork fades into invitation instead of ending at its boundary`, m.continuity.heroFadesIntoInvitation);
+    check(`${name}: one left invitation botanical bridges gently into the program`, m.continuity.invitationUsesOneLeftBotanicalBridge);
   }
 
   for (const [name, m] of Object.entries(reduced)) {
@@ -904,7 +1028,7 @@ try {
   }
 
   console.log("\n--- sections, scrolled into view ---");
-  for (const viewport of [VIEWPORTS[0], VIEWPORTS[3]]) {
+  for (const viewport of VIEWPORTS) {
     const sections = await captureSections(chrome, viewport);
     for (const [id, s] of Object.entries(sections)) {
       check(

@@ -81,12 +81,12 @@ export const site = {
       height: 1800,
     },
     venueDetail: {
-      src: "/artwork/venue-detail-master.webp",
-      width: 1200,
-      height: 1000,
+      src: "/artwork/venue-interior-approved.png",
+      width: 1536,
+      height: 1024,
     },
     illustrationAlt:
-      "Aden Boğazköy Tesisleri'nin cam yapısını, ivory drapeleri ve beyaz çiçekli bahçesini gösteren suluboya illüstrasyon",
+      "Aden Boğazköy Tesisleri'nin iç mekânını, avizeleri, tavan drapelerini ve çiçekli koridorunu gösteren suluboya illüstrasyon",
     botanical: "/artwork/botanical-branch.webp",
     botanicalAlt: "",
   },
