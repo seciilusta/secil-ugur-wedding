@@ -1,27 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Bodoni_Moda, Jost } from "next/font/google";
 import { site } from "@/config/site";
 import "./globals.css";
-
-/**
- * Both families are loaded with the latin-ext subset, which is what carries the
- * Turkish ğ, ş and dotless ı. Without it those characters fall back to a
- * different font mid-word.
- */
-const bodoni = Bodoni_Moda({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-bodoni",
-});
-
-const jost = Jost({
-  subsets: ["latin", "latin-ext"],
-  weight: ["300", "400", "500"],
-  display: "swap",
-  variable: "--font-jost",
-});
 
 export const metadata: Metadata = {
   title: site.metadata.title,
@@ -73,7 +52,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className={`${bodoni.variable} ${jost.variable}`}>
+    <html lang="tr">
       <body>
         {/*
           Scroll-revealed sections are prerendered with an inline `opacity: 0`
@@ -82,7 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           details and the RSVP heading would be invisible. This puts them back.
         */}
         <noscript>
-          <style>{`[data-reveal]{opacity:1 !important;transform:none !important;clip-path:none !important}`}</style>
+          <style>{`[data-reveal],[data-choreography]{opacity:1 !important;transform:none !important;clip-path:none !important}`}</style>
         </noscript>
         {children}
       </body>

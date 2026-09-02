@@ -270,8 +270,8 @@ async function buildSocialShareImage(illustration, box) {
     <text x="${W / 2}" y="146" font-size="76">Seçil &amp; Uğur</text>
   </g>
   <g font-family="Jost, Futura, Helvetica Neue, sans-serif" fill="#4C5544" text-anchor="middle" letter-spacing="6">
-    <text x="${W / 2}" y="188" font-size="21">4 EKİM 2026 · PAZAR · 19.00</text>
-    <text x="${W / 2}" y="222" font-size="17" fill="#6E6A64">ADEN BOĞAZKÖY TESİSLERİ · ARNAVUTKÖY</text>
+    <text x="${W / 2}" y="188" font-size="21">4 EKİM 2026 · PAZAR · 18.30</text>
+    <text x="${W / 2}" y="222" font-size="17" fill="#6E6A64">ADEN BOĞAZKÖY TESİSLERİ · CAMLI KÖŞK</text>
   </g>
 </svg>`);
 

@@ -32,8 +32,9 @@ secil-ugur-wedding/
 │   │   │   └── page.tsx          Section assembly, top to bottom
 │   │   ├── components/
 │   │   │   ├── sections/         One file per page section
-│   │   │   ├── rsvp/RsvpForm.tsx The form (the only stateful component)
-│   │   │   └── motion/           Two small reveal wrappers
+│   │   │   ├── rsvp/RsvpForm.tsx The form and its existing submission flow
+│   │   │   ├── timeline/         Scroll-progress wedding-day schedule
+│   │   │   └── motion/           Section-specific choreography primitives
 │   │   ├── config/site.ts        ALL wedding information and copy
 │   │   └── lib/
 │   │       ├── runtime-config.ts Loads and validates runtime-config.json
@@ -117,7 +118,7 @@ Run from the repository root:
 | `pnpm build` | Production build of both |
 | `pnpm build:web` | Static export into `apps/web/out/` |
 | `pnpm build:api` | Compile the API into `services/rsvp-api/dist/` |
-| `pnpm test` | API test suite |
+| `pnpm test` | Website behavior tests and the 39-test API suite |
 | `pnpm lint` | Lint both |
 | `pnpm typecheck` | Type-check both |
 | `pnpm db:migrate` | Apply pending migrations |

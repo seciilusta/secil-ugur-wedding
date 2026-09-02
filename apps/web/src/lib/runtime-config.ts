@@ -46,6 +46,10 @@ async function fetchRuntimeConfig(): Promise<RuntimeConfig> {
   // Resolved against the document base so the site also works when it is hosted
   // in a subdirectory rather than at the domain root.
   const url = new URL(CONFIG_FILENAME, document.baseURI);
+  // Some static CDNs are more aggressive than the browser's `no-store`
+  // directive. A per-page cache key guarantees that a corrected deployment
+  // config is observed on the next visit without rebuilding the application.
+  url.searchParams.set("page", Date.now().toString(36));
 
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), CONFIG_TIMEOUT_MS);
