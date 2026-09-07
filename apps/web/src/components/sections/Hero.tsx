@@ -4,6 +4,7 @@ import { site } from "@/config/site";
 
 export function Hero() {
   const { couple, event, venue, hero, artwork } = site;
+  const [eventDay, eventMonth, eventYear] = event.date.split(" ");
 
   return (
     <section className="hero-artwork" aria-labelledby="hero-title">
@@ -63,22 +64,31 @@ export function Hero() {
               <span>{couple.groomFirstName}</span>
             </h1>
           </EntranceMotion>
-        </div>
 
-        <EntranceMotion entrance="hero-meta" trigger="mount" delay={0.38} className="hero-details">
-          <p className="hero-date">
-            <time dateTime={event.isoDate}>{event.date}</time>
-            <span>{event.day}</span>
-          </p>
-          <p className="hero-place">
-            <span>{venue.name}</span>
-            <span>{venue.spaceName} · {venue.locationShort}</span>
-          </p>
-        </EntranceMotion>
+          <EntranceMotion entrance="hero-meta" trigger="mount" delay={0.38} className="hero-details">
+            <p className="hero-date">
+              <time dateTime={event.isoDate}>{event.date}</time>
+              <span>{event.day}</span>
+            </p>
+            <p className="hero-place">
+              <span>{venue.name}</span>
+              <span>{venue.spaceName} · {venue.locationShort}</span>
+            </p>
+          </EntranceMotion>
+        </div>
 
         <EntranceMotion entrance="quiet" trigger="mount" delay={0.52} className="hero-countdown">
           <p className="hero-countdown-overline">{hero.countdown.overline}</p>
           <Countdown />
+        </EntranceMotion>
+
+        <EntranceMotion entrance="quiet" trigger="mount" delay={0.58} className="hero-vertical-date">
+          <time aria-hidden="true" dateTime={event.isoDate}>
+            <span>{eventDay.padStart(2, "0")}</span>
+            <span>{eventMonth}</span>
+            <span>{eventYear}</span>
+          </time>
+          <span aria-hidden="true" className="hero-vertical-date-line" />
         </EntranceMotion>
 
         <EntranceMotion entrance="quiet" trigger="mount" delay={0.7} className="hero-scroll">

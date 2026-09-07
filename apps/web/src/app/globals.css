@@ -47,6 +47,13 @@
 
   --font-display: var(--font-bodoni), "Times New Roman", serif;
   --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  /* The Hero names need a calmer letterform than the high-contrast display
+     face used for section headlines. Baskerville keeps Turkish characters
+     graceful at invitation scale without decorative terminal shapes. */
+  --font-names: Baskerville, "Iowan Old Style", "Hoefler Text", Georgia, serif;
+  /* Snell Roundhand and Apple Chancery are bundled with macOS/iOS, keeping the
+     small handwritten accent elegant without adding a network font request. */
+  --font-script: "Snell Roundhand", "Apple Chancery", "URW Chancery L", cursive;
 
   /* Fluid scale. The upper bounds are deliberately restrained so large
      headings can never push hero content off a short screen.              */
@@ -455,7 +462,13 @@
   .hero-light {
     z-index: -1;
     background:
-      linear-gradient(90deg, color-mix(in srgb, var(--color-paper) 98%, transparent) 0%, transparent 44%),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--color-paper) 98%, transparent) 0%,
+        color-mix(in srgb, var(--color-paper) 96%, transparent) 28%,
+        color-mix(in srgb, var(--color-paper) 76%, transparent) 38%,
+        transparent 54%
+      ),
       linear-gradient(
         0deg,
         color-mix(in srgb, var(--color-ivory) 96%, transparent) 0%,
@@ -470,7 +483,7 @@
     inset: 0 0 auto;
     width: 100%;
     height: calc(100% + var(--hero-bleed));
-    transform-origin: 70% 70%;
+    transform-origin: right 70%;
     opacity: 0.94;
     pointer-events: none;
     -webkit-mask-image: linear-gradient(to bottom, #000 0 calc(100% - var(--hero-bleed)), transparent 100%);
@@ -486,7 +499,7 @@
 
   .hero-venue-art img {
     object-fit: cover;
-    object-position: 62% 58%;
+    object-position: 64% 58%;
   }
 
   .hero-botanical {
@@ -504,10 +517,10 @@
   }
 
   .hero-botanical-left {
-    top: -14rem;
-    left: -8rem;
+    top: -16rem;
+    left: -7rem;
     width: clamp(24rem, 38vw, 38rem);
-    opacity: 0.46;
+    opacity: 0.42;
     transform: rotate(15deg);
   }
 
@@ -517,27 +530,23 @@
        invitation flower as the next section begins. */
     bottom: 0;
     width: clamp(23rem, 34vw, 34rem);
-    opacity: 0.26;
+    opacity: 0.25;
     transform: rotate(-24deg) scaleX(-1);
   }
 
   .hero-shell {
     position: relative;
     z-index: 2;
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.75fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    gap: 2rem 7vw;
     width: 100%;
-    max-width: 96rem;
     min-height: 100vh;
     min-height: 100svh;
-    margin-inline: auto;
-    padding: clamp(1.5rem, 3.2vw, 3.25rem) var(--spacing-gutter) clamp(1.75rem, 4vh, 3.5rem);
   }
 
   .hero-topbar {
-    grid-column: 1 / -1;
+    position: absolute;
+    top: clamp(1.25rem, 3.8vh, 2.75rem);
+    right: clamp(1.25rem, 3vw, 3.5rem);
+    left: clamp(1.25rem, 3vw, 3.5rem);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -550,15 +559,19 @@
     min-height: 44px;
     align-items: center;
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     letter-spacing: 0.03em;
-    color: var(--color-olive);
+    color: color-mix(in srgb, var(--color-olive) 68%, transparent);
   }
 
   .hero-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: clamp(1.25rem, 2.7vw, 3rem);
+    gap: clamp(2rem, 5vw, 5.5rem);
+    white-space: nowrap;
   }
 
   .hero-nav a {
@@ -566,11 +579,11 @@
     min-height: 44px;
     display: inline-flex;
     align-items: center;
-    font-size: 0.65rem;
+    font-size: 0.58rem;
     font-weight: 500;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-charcoal) 72%, transparent);
+    color: color-mix(in srgb, var(--color-charcoal) 54%, transparent);
   }
 
   .hero-nav a::after {
@@ -593,20 +606,25 @@
   }
 
   .hero-copy {
-    position: relative;
+    position: absolute;
     isolation: isolate;
-    align-self: center;
-    max-width: 49rem;
-    padding-block: 4vh 12vh;
+    top: 24vh;
+    left: clamp(2rem, 12vw, 14rem);
+    width: min(35vw, 38rem);
   }
 
   .hero-copy::before {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: -2rem -3rem -3rem -2rem;
+    inset: -3rem -5rem -4rem -3.5rem;
     pointer-events: none;
-    background: radial-gradient(ellipse at 28% 46%, color-mix(in srgb, var(--color-paper) 88%, transparent) 0%, transparent 72%);
+    background: radial-gradient(
+      ellipse at 28% 44%,
+      color-mix(in srgb, var(--color-paper) 72%, transparent) 0%,
+      color-mix(in srgb, var(--color-paper) 34%, transparent) 48%,
+      transparent 74%
+    );
   }
 
   .hero-overline,
@@ -623,56 +641,50 @@
   }
 
   .hero-title {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    margin-top: clamp(1rem, 2vh, 1.75rem);
-    font-family: var(--font-display);
-    font-size: clamp(4.4rem, 8.2vw, 9.2rem);
+    display: grid;
+    justify-items: start;
+    margin-top: clamp(0.8rem, 1.5vh, 1.25rem);
+    font-family: var(--font-names);
+    font-size: clamp(5.8rem, 8vw, 9.6rem);
     font-weight: 400;
-    line-height: 0.78;
-    letter-spacing: -0.052em;
+    line-height: 0.72;
+    letter-spacing: -0.045em;
+    /* Preserve the couple's title case rather than forcing an all-caps lockup. */
+    text-transform: none;
     color: var(--color-charcoal);
     text-wrap: balance;
   }
 
   .hero-title span:last-child {
-    margin-left: 0.18em;
+    margin-left: 0;
   }
 
   .hero-title i {
-    margin-inline: 0.12em 0.02em;
+    justify-self: center;
+    margin: -0.08em 0 -0.02em;
+    font-family: var(--font-script);
     font-size: 0.62em;
+    font-style: normal;
     font-weight: 400;
     color: var(--color-champagne);
   }
 
   .hero-details {
-    position: relative;
-    isolation: isolate;
-    align-self: start;
-    justify-self: end;
-    width: min(100%, 24rem);
-    margin-top: clamp(4rem, 13vh, 9rem);
-    padding-left: clamp(1.25rem, 3vw, 3rem);
-    border-left: 1px solid color-mix(in srgb, var(--color-champagne) 75%, transparent);
-    text-shadow: 0 1px 14px color-mix(in srgb, var(--color-paper) 92%, transparent);
-  }
-
-  .hero-details::before,
-  .hero-countdown::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: -1rem -1.5rem;
-    pointer-events: none;
-    background: color-mix(in srgb, var(--color-paper) 70%, transparent);
+    width: min(100%, 34rem);
+    margin-top: clamp(2rem, 3vw, 3rem);
+    font-family: var(--font-sans);
+    font-size: clamp(0.61rem, 0.66vw, 0.72rem);
+    font-weight: 500;
+    line-height: 1.65;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-charcoal) 74%, transparent);
   }
 
   .hero-date {
-    font-family: var(--font-display);
-    font-size: clamp(1.3rem, 2.2vw, 2.1rem);
-    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
 
   .hero-date span,
@@ -681,18 +693,12 @@
   }
 
   .hero-date span {
-    margin-top: 0.3rem;
-    font-family: var(--font-sans);
-    font-size: var(--text-fine);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-charcoal) 84%, transparent);
+    margin: 0;
+    color: inherit;
   }
 
   .hero-place {
-    margin-top: 2rem;
-    font-size: var(--text-body);
-    line-height: 1.65;
+    margin-top: 0.75rem;
   }
 
   .hero-place span:last-child {
@@ -700,18 +706,17 @@
   }
 
   .hero-countdown {
-    position: relative;
+    position: absolute;
     isolation: isolate;
-    grid-column: 2;
-    align-self: end;
-    justify-self: end;
-    width: min(100%, 30rem);
-    text-shadow: 0 1px 12px color-mix(in srgb, var(--color-paper) 92%, transparent);
+    left: clamp(2rem, 12vw, 14rem);
+    bottom: 7vh;
+    width: min(38vw, 38rem);
   }
 
   .hero-countdown-overline {
-    margin-bottom: 0.9rem;
-    color: color-mix(in srgb, var(--color-charcoal) 82%, transparent);
+    margin-bottom: 0.65rem;
+    font-size: 0.56rem;
+    color: color-mix(in srgb, var(--color-charcoal) 65%, transparent);
   }
 
   .countdown,
@@ -726,7 +731,7 @@
     position: relative;
     display: grid;
     gap: 0.25rem;
-    padding: 0.9rem clamp(0.5rem, 1.3vw, 1rem);
+    padding: 0.75rem clamp(0.45rem, 1vw, 0.85rem);
   }
 
   .countdown-unit + .countdown-unit::before {
@@ -741,14 +746,14 @@
 
   .countdown-value {
     font-family: var(--font-display);
-    font-size: clamp(1.4rem, 2vw, 2rem);
+    font-size: clamp(1.45rem, 1.8vw, 2.15rem);
     font-variant-numeric: tabular-nums;
     line-height: 1;
   }
 
   .countdown-label {
-    font-size: 0.58rem;
-    letter-spacing: 0.16em;
+    font-size: clamp(0.42rem, 0.42vw, 0.5rem);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--color-charcoal) 57%, transparent);
   }
@@ -777,8 +782,10 @@
   }
 
   .hero-scroll {
-    grid-column: 1;
-    align-self: end;
+    position: absolute;
+    left: 50%;
+    bottom: 2.5vh;
+    transform: translateX(-50%);
   }
 
   .hero-scroll a {
@@ -800,14 +807,60 @@
     animation: hairline-drift-x 3.6s var(--ease-calm) infinite;
   }
 
+  .hero-vertical-date {
+    position: absolute;
+    top: clamp(6.5rem, 12vh, 9rem);
+    right: clamp(1.25rem, 2.5vw, 3rem);
+    display: grid;
+    justify-items: center;
+    gap: 1.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.72rem, 0.8vw, 0.9rem);
+    line-height: 1.35;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-charcoal) 58%, transparent);
+  }
+
+  .hero-vertical-date time {
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+  }
+
+  .hero-vertical-date-line {
+    position: relative;
+    display: block;
+    width: 1px;
+    height: clamp(3rem, 7vh, 5rem);
+    background: color-mix(in srgb, var(--color-olive) 38%, transparent);
+  }
+
+  .hero-vertical-date-line::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0.3rem;
+    height: 0.3rem;
+    transform: translate(-50%, 50%);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-olive) 58%, transparent);
+  }
+
   @media (max-width: 69.999rem) {
-    .hero-shell {
-      grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.68fr);
-      gap: 1.5rem 3vw;
+    .hero-title {
+      font-size: clamp(4.8rem, 9.8vw, 7rem);
     }
 
-    .hero-title {
-      font-size: clamp(4rem, 9.8vw, 7rem);
+    .hero-copy {
+      left: clamp(2rem, 8.5vw, 6rem);
+      width: min(46vw, 34rem);
+    }
+
+    .hero-countdown {
+      left: clamp(2rem, 8.5vw, 6rem);
+      width: min(48vw, 34rem);
     }
 
     .hero-venue-art { opacity: 0.93; }
@@ -820,27 +873,18 @@
 
     .hero-light {
       background:
+        /* On mobile the copy sits above the architecture, so a desktop-style
+           horizontal wash would bleach the artwork's left edge for no reason. */
         linear-gradient(180deg, color-mix(in srgb, var(--color-paper) 96%, transparent) 0%, transparent 34%),
         linear-gradient(0deg, color-mix(in srgb, var(--color-paper) 91%, transparent) 0%, transparent 42%);
     }
 
     .hero-shell {
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: auto auto minmax(5.5rem, 1fr) auto auto;
-      gap: 1rem;
-      padding-top: 1rem;
-      padding-bottom: max(1.1rem, env(safe-area-inset-bottom));
-    }
-
-    .hero-topbar,
-    .hero-copy,
-    .hero-details,
-    .hero-countdown,
-    .hero-scroll {
-      grid-column: 1;
+      min-height: 100svh;
     }
 
     .hero-topbar {
+      top: 0.75rem;
       gap: 0.75rem;
     }
 
@@ -849,6 +893,8 @@
     }
 
     .hero-nav {
+      position: static;
+      transform: none;
       gap: clamp(0.65rem, 2.8vw, 1rem);
     }
 
@@ -859,9 +905,18 @@
     }
 
     .hero-copy {
-      align-self: start;
-      max-width: 100%;
-      padding-block: clamp(2.4rem, 8vh, 4.5rem) 0;
+      top: clamp(7.25rem, 17vh, 9rem);
+      left: var(--spacing-gutter);
+      width: calc(100% - (2 * var(--spacing-gutter)));
+    }
+
+    .hero-copy::before {
+      inset: -1.25rem -1.75rem -1.5rem;
+      background: radial-gradient(
+        ellipse at 28% 42%,
+        color-mix(in srgb, var(--color-paper) 52%, transparent) 0%,
+        transparent 72%
+      );
     }
 
     .hero-overline {
@@ -869,38 +924,30 @@
     }
 
     .hero-title {
-      display: grid;
-      justify-items: start;
       margin-top: 0.9rem;
-      font-size: clamp(3.8rem, 19vw, 6.2rem);
-      line-height: 0.76;
+      font-size: clamp(3.7rem, 17vw, 5.3rem);
+      line-height: 0.72;
     }
 
     .hero-title i {
-      margin: -0.05em 0 0.02em 0.85em;
-      font-size: 0.54em;
+      justify-self: center;
+      margin: -0.06em 0 0;
+      font-size: 0.62em;
     }
 
     .hero-title span:last-child {
-      margin-left: 0.46em;
+      margin-left: 0;
     }
 
     .hero-details {
-      align-self: start;
-      justify-self: start;
       width: min(100%, 18rem);
-      margin-top: 0;
-      padding-left: 1rem;
-    }
-
-    .hero-date {
-      font-size: clamp(1.05rem, 4.5vw, 1.4rem);
+      margin-top: 1.4rem;
+      font-size: 0.56rem;
+      letter-spacing: 0.14em;
     }
 
     .hero-place {
-      margin-top: 0.8rem;
-      font-size: 0.82rem;
-      line-height: 1.45;
+      margin-top: 0.55rem;
     }
 
     .hero-venue-art {
@@ -928,9 +975,9 @@
     }
 
     .hero-countdown {
-      align-self: end;
-      justify-self: stretch;
-      width: 100%;
+      left: var(--spacing-gutter);
+      bottom: max(7vh, 4.75rem);
+      width: calc(100% - (2 * var(--spacing-gutter)));
     }
 
     .hero-countdown-overline {
@@ -952,11 +999,16 @@
     }
 
     .hero-scroll {
-      justify-self: start;
+      right: auto;
+      bottom: max(1vh, env(safe-area-inset-bottom));
     }
 
     .hero-scroll a {
       min-height: 32px;
+    }
+
+    .hero-vertical-date {
+      display: none;
     }
   }
 

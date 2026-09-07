@@ -276,6 +276,11 @@ const MEASURE = `(() => {
   const hb = hero && hero.getBoundingClientRect();
   const countdown = document.querySelector('.hero-countdown');
   const cb = countdown && countdown.getBoundingClientRect();
+  const heroDetails = document.querySelector('.hero-details');
+  const hdb = heroDetails && heroDetails.getBoundingClientRect();
+  const verticalDate = document.querySelector('.hero-vertical-date');
+  const vdtb = verticalDate && verticalDate.getBoundingClientRect();
+  const titleParts = names && [...names.querySelectorAll('span, i')].map((el) => el.getBoundingClientRect());
   const venueDetail = document.querySelector('#mekan .venue-art-crop img');
   const vdb = venueDetail && venueDetail.getBoundingClientRect();
   const venueDetailFrame = document.querySelector('#mekan .venue-art-crop');
@@ -305,7 +310,15 @@ const MEASURE = `(() => {
     viewport: { w: vw, h: de.clientHeight },
     horizontalOverflow: de.scrollWidth > vw,
     scrollWidth: de.scrollWidth,
-    names: nb && { w: Math.round(nb.width), left: Math.round(nb.left), right: Math.round(nb.right), fontSize: ns.fontSize },
+    names: nb && {
+      w: Math.round(nb.width),
+      top: Math.round(nb.top),
+      bottom: Math.round(nb.bottom),
+      left: Math.round(nb.left),
+      right: Math.round(nb.right),
+      fontSize: ns.fontSize,
+      stacked: Boolean(titleParts && titleParts.length === 3 && titleParts[0].top < titleParts[1].top && titleParts[1].top < titleParts[2].top),
+    },
     illustration: ib && {
       w: Math.round(ib.width), h: Math.round(ib.height),
       top: Math.round(ib.top), bottom: Math.round(ib.bottom),
@@ -315,6 +328,19 @@ const MEASURE = `(() => {
       artDirectedCrop: ib.left < -0.5 || ib.right > vw + 0.5
     },
     heroAboveFold: cb && hb ? (hb.bottom <= de.clientHeight + 1 && cb.bottom <= de.clientHeight) : null,
+    heroDetails: hdb && {
+      top: Math.round(hdb.top),
+      left: Math.round(hdb.left),
+      gapBelowNames: nb ? Math.round(hdb.top - nb.bottom) : null,
+    },
+    heroCountdown: cb && {
+      left: Math.round(cb.left),
+      bottomGap: Math.round(de.clientHeight - cb.bottom),
+    },
+    heroVerticalDate: vdtb && {
+      rightGap: Math.round(vw - vdtb.right),
+      verticallyInside: vdtb.top >= 0 && vdtb.bottom <= de.clientHeight,
+    },
     venueDetail: vdb && {
       w: Math.round(vdb.width), h: Math.round(vdb.height),
       right: Math.round(vdb.right),
@@ -958,6 +984,35 @@ try {
       `${m.names?.left}..${m.names?.right} within ${m.viewport.w}`,
     );
     check(`${name}: hero fits the opening screen`, m.heroAboveFold === true);
+    check(`${name}: hero names form a stacked editorial lockup`, m.names?.stacked === true);
+    if (m.viewport.w >= 1120) {
+      check(
+        `${name}: hero information shares the left editorial column`,
+        (m.names?.left ?? 0) >= m.viewport.w * 0.1 &&
+          (m.names?.left ?? m.viewport.w) <= m.viewport.w * 0.135 &&
+          Math.abs((m.heroDetails?.left ?? 0) - (m.names?.left ?? 99_999)) <= 2,
+        `${m.names?.left}px / ${m.heroDetails?.left}px`,
+      );
+      check(
+        `${name}: hero details retain breathing room below the names`,
+        (m.heroDetails?.gapBelowNames ?? 0) >= 24,
+        `${m.heroDetails?.gapBelowNames}px gap`,
+      );
+      check(
+        `${name}: countdown stays low in the left column`,
+        Math.abs((m.heroCountdown?.left ?? 0) - (m.names?.left ?? 99_999)) <= 2 &&
+          (m.heroCountdown?.bottomGap ?? 0) >= m.viewport.h * 0.055 &&
+          (m.heroCountdown?.bottomGap ?? m.viewport.h) <= m.viewport.h * 0.09,
+        JSON.stringify(m.heroCountdown),
+      );
+      check(
+        `${name}: vertical date stays at the upper-right edge`,
+        m.heroVerticalDate?.verticallyInside === true &&
+          (m.heroVerticalDate?.rightGap ?? 0) >= m.viewport.w * 0.015 &&
+          (m.heroVerticalDate?.rightGap ?? m.viewport.w) <= m.viewport.w * 0.035,
+        JSON.stringify(m.heroVerticalDate),
+      );
+    }
     check(
       `${name}: illustration reads as a full composition layer`,
       (m.illustration?.pctOfViewportWidth ?? 0) >= 70,
