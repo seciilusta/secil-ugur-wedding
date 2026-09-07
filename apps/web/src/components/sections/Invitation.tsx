@@ -13,8 +13,8 @@ export function Invitation() {
 
       <div className="shell invitation-grid">
         <EntranceMotion entrance="from-left" className="invitation-label">
-          <p className="overline text-olive">{invitation.overline}</p>
-          <LineDraw className="editorial-line" delay={0.12} />
+          <p className="section-kicker text-olive">{invitation.overline}</p>
+          <LineDraw className="editorial-line section-kicker-line" delay={0.12} />
         </EntranceMotion>
 
         <EntranceMotion entrance="from-right" delay={0.1} className="invitation-copy">

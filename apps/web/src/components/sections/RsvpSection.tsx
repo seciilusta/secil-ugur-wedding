@@ -10,12 +10,13 @@ export function RsvpSection() {
       <div className="shell rsvp-grid">
         <div className="rsvp-heading">
           <EntranceMotion entrance="from-left">
-            <p className="overline text-champagne">{rsvp.overline}</p>
-            <LineDraw className="editorial-line editorial-line-dark" delay={0.1} />
+            <p className="section-kicker text-champagne">{rsvp.overline}</p>
+            <LineDraw className="editorial-line editorial-line-dark section-kicker-line" delay={0.1} />
           </EntranceMotion>
 
           <EntranceMotion entrance="quiet" delay={0.1}>
             <h2 id="rsvp-title">{rsvp.heading}</h2>
+            <LineDraw className="editorial-line editorial-line-dark section-title-line" delay={0.16} />
           </EntranceMotion>
 
           <EntranceMotion entrance="from-left" delay={0.2}>

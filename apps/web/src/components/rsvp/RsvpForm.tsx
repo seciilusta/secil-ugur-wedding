@@ -229,7 +229,7 @@ export function RsvpForm() {
         });
       }}
       noValidate
-      className="border-t border-olive-line/50 pt-8"
+      className="pt-8"
     >
       {/* ------------------------------------------------------- full name */}
       <div>

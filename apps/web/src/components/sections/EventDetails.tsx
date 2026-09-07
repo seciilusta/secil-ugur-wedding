@@ -10,8 +10,8 @@ export function EventDetails() {
       <div className="shell wedding-day-grid">
         <div className="wedding-day-heading">
           <EntranceMotion entrance="from-left">
-            <p className="overline text-olive">{eventDetails.overline}</p>
-            <LineDraw className="editorial-line" delay={0.1} />
+            <p className="section-kicker text-olive">{eventDetails.overline}</p>
+            <LineDraw className="editorial-line section-kicker-line" delay={0.1} />
           </EntranceMotion>
 
           <EntranceMotion entrance="quiet" delay={0.1}>
@@ -24,6 +24,7 @@ export function EventDetails() {
 
           <EntranceMotion entrance="from-left" delay={0.18}>
             <h2 id="wedding-day-title">{eventDetails.heading}</h2>
+            <LineDraw className="editorial-line section-title-line" delay={0.22} />
             <p className="wedding-day-intro">{eventDetails.intro}</p>
             <p className="sr-only">{event.date}, {event.day}</p>
           </EntranceMotion>

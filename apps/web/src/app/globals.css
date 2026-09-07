@@ -201,7 +201,7 @@
   }
 
   /* Small tracked label that opens most sections. */
-  .overline {
+  .section-kicker {
     font-size: var(--text-overline);
     letter-spacing: var(--tracking-overline);
     text-transform: uppercase;
@@ -235,9 +235,9 @@
       linear-gradient(
         180deg,
         var(--color-paper) 0%,
-        var(--color-ivory) 20%,
-        var(--color-paper) 30%,
-        var(--color-beige) 78%,
+        var(--color-ivory) 9%,
+        var(--color-beige) 32%,
+        color-mix(in srgb, var(--color-beige) 72%, var(--color-beige-deep)) 72%,
         var(--color-beige-deep) 100%
       );
   }
@@ -245,15 +245,16 @@
   .evening-experience {
     /* A compact dusk handoff: the RSVP arrives sooner after the venue while
        retaining a visible beige-to-olive progression. */
-    --evening-arrival: clamp(11rem, 16vw, 14rem);
+    --evening-arrival: clamp(18rem, 20vw, 22rem);
     position: relative;
     isolation: isolate;
     overflow: visible;
     background: linear-gradient(
       180deg,
       var(--color-beige-deep) 0%,
-      color-mix(in srgb, var(--color-beige-deep) 58%, var(--color-olive-mist)) 4rem,
-      var(--color-olive-mist) 8rem,
+      color-mix(in srgb, var(--color-beige-deep) 76%, var(--color-olive-mist)) 7rem,
+      color-mix(in srgb, var(--color-beige-deep) 45%, var(--color-olive-mist)) 12rem,
+      var(--color-olive-mist) 16rem,
       var(--color-olive) var(--evening-arrival),
       var(--color-olive-deep) calc(var(--evening-arrival) + 28rem),
       #343a30 calc(var(--evening-arrival) + 54rem),
@@ -267,9 +268,7 @@
     z-index: 0;
     inset: 0;
     pointer-events: none;
-    background:
-      radial-gradient(ellipse at 86% 46%, color-mix(in srgb, var(--color-amber) 11%, transparent), transparent 32%),
-      radial-gradient(ellipse at 18% 82%, color-mix(in srgb, var(--color-champagne) 7%, transparent), transparent 30%);
+    background: none;
   }
 
   /* ---- RSVP form on the olive band -----------------------------------
@@ -447,7 +446,7 @@
     z-index: -5;
     background:
       radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--color-champagne) 20%, transparent), transparent 34%),
-      linear-gradient(125deg, var(--color-paper) 0%, var(--color-ivory) 52%, color-mix(in srgb, var(--color-beige) 58%, var(--color-paper)) 100%);
+      linear-gradient(125deg, var(--color-paper) 0%, var(--color-ivory) 34%, color-mix(in srgb, var(--color-beige) 78%, var(--color-paper)) 76%, var(--color-beige) 100%);
   }
 
   .hero-paper::after {
@@ -464,16 +463,16 @@
     background:
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--color-paper) 98%, transparent) 0%,
-        color-mix(in srgb, var(--color-paper) 96%, transparent) 28%,
-        color-mix(in srgb, var(--color-paper) 76%, transparent) 38%,
-        transparent 54%
+        color-mix(in srgb, var(--color-paper) 80%, transparent) 0%,
+        color-mix(in srgb, var(--color-paper) 54%, transparent) 28%,
+        color-mix(in srgb, var(--color-paper) 18%, transparent) 42%,
+        transparent 56%
       ),
       linear-gradient(
         0deg,
-        color-mix(in srgb, var(--color-ivory) 96%, transparent) 0%,
-        color-mix(in srgb, var(--color-ivory) 72%, transparent) 10%,
-        transparent 36%
+        color-mix(in srgb, var(--color-beige-deep) 76%, transparent) 0%,
+        color-mix(in srgb, var(--color-beige) 48%, transparent) 18%,
+        transparent 48%
       );
   }
 
@@ -621,8 +620,8 @@
     pointer-events: none;
     background: radial-gradient(
       ellipse at 28% 44%,
-      color-mix(in srgb, var(--color-paper) 72%, transparent) 0%,
-      color-mix(in srgb, var(--color-paper) 34%, transparent) 48%,
+      color-mix(in srgb, var(--color-beige) 30%, transparent) 0%,
+      color-mix(in srgb, var(--color-beige) 12%, transparent) 48%,
       transparent 74%
     );
   }
@@ -643,7 +642,7 @@
   .hero-title {
     display: grid;
     justify-items: start;
-    margin-top: clamp(0.8rem, 1.5vh, 1.25rem);
+    margin-top: 0;
     font-family: var(--font-names);
     font-size: clamp(5.8rem, 8vw, 9.6rem);
     font-weight: 400;
@@ -708,6 +707,7 @@
   .hero-countdown {
     position: absolute;
     isolation: isolate;
+    z-index: 3;
     left: clamp(2rem, 12vw, 14rem);
     bottom: 7vh;
     width: min(38vw, 38rem);
@@ -783,9 +783,8 @@
 
   .hero-scroll {
     position: absolute;
-    left: 50%;
-    bottom: 2.5vh;
-    transform: translateX(-50%);
+    left: clamp(2rem, 12vw, 14rem);
+    bottom: clamp(1.5rem, 3.5vh, 2.75rem);
   }
 
   .hero-scroll a {
@@ -875,8 +874,8 @@
       background:
         /* On mobile the copy sits above the architecture, so a desktop-style
            horizontal wash would bleach the artwork's left edge for no reason. */
-        linear-gradient(180deg, color-mix(in srgb, var(--color-paper) 96%, transparent) 0%, transparent 34%),
-        linear-gradient(0deg, color-mix(in srgb, var(--color-paper) 91%, transparent) 0%, transparent 42%);
+        linear-gradient(180deg, color-mix(in srgb, var(--color-paper) 82%, transparent) 0%, transparent 34%),
+        linear-gradient(0deg, color-mix(in srgb, var(--color-beige-deep) 72%, transparent) 0%, transparent 48%);
     }
 
     .hero-shell {
@@ -914,7 +913,7 @@
       inset: -1.25rem -1.75rem -1.5rem;
       background: radial-gradient(
         ellipse at 28% 42%,
-        color-mix(in srgb, var(--color-paper) 52%, transparent) 0%,
+        color-mix(in srgb, var(--color-beige) 22%, transparent) 0%,
         transparent 72%
       );
     }
@@ -976,13 +975,14 @@
 
     .hero-countdown {
       left: var(--spacing-gutter);
-      bottom: max(7vh, 4.75rem);
+      bottom: max(2.75rem, env(safe-area-inset-bottom) + 1.5rem);
       width: calc(100% - (2 * var(--spacing-gutter)));
     }
 
     .hero-countdown-overline {
       margin-bottom: 0.45rem;
       font-size: 0.55rem;
+      color: color-mix(in srgb, var(--color-charcoal) 82%, transparent);
     }
 
     .countdown-unit {
@@ -1000,7 +1000,9 @@
 
     .hero-scroll {
       right: auto;
-      bottom: max(1vh, env(safe-area-inset-bottom));
+      left: var(--spacing-gutter);
+      bottom: max(0.75rem, env(safe-area-inset-bottom));
+      transform: none;
     }
 
     .hero-scroll a {
@@ -1008,7 +1010,17 @@
     }
 
     .hero-vertical-date {
-      display: none;
+      top: 4.25rem;
+      right: var(--spacing-gutter);
+      display: grid;
+      gap: 0.65rem;
+      font-size: 0.56rem;
+      letter-spacing: 0.1em;
+      color: color-mix(in srgb, var(--color-charcoal) 68%, transparent);
+    }
+
+    .hero-vertical-date-line {
+      height: 2.25rem;
     }
   }
 
@@ -1016,11 +1028,19 @@
 
   .editorial-line {
     display: block;
-    width: clamp(3rem, 6vw, 6rem);
     height: 1px;
-    margin-top: 1.25rem;
     transform-origin: left;
     background: var(--color-champagne);
+  }
+
+  .section-kicker-line {
+    width: clamp(3rem, 6vw, 6rem);
+    margin-top: 1.25rem;
+  }
+
+  .section-title-line {
+    width: clamp(4.5rem, 9vw, 8rem);
+    margin-top: clamp(1.25rem, 2.5vw, 2rem);
   }
 
   .invitation-composition {
@@ -1042,7 +1062,7 @@
   }
 
   .invitation-label {
-    padding-top: 0.8rem;
+    padding-top: 1.35rem;
   }
 
   .invitation-copy {
@@ -1091,7 +1111,7 @@
     isolation: isolate;
     overflow: visible;
     padding-block: clamp(5rem, 7vw, 7rem) clamp(5.5rem, 7vw, 7rem);
-    background: radial-gradient(ellipse at 12% 42%, color-mix(in srgb, var(--color-paper) 62%, transparent), transparent 58%);
+    background: radial-gradient(ellipse at 12% 42%, color-mix(in srgb, var(--color-beige) 16%, transparent), transparent 58%);
   }
 
   .wedding-day-grid {
@@ -1136,7 +1156,7 @@
   }
 
   .wedding-day-heading h2 {
-    margin-top: clamp(2.8rem, 6vw, 5rem);
+    margin-top: clamp(2rem, 4vw, 3.5rem);
     font-family: var(--font-display);
     font-size: var(--text-heading);
     font-weight: 400;
@@ -1257,7 +1277,7 @@
     pointer-events: none;
     background: radial-gradient(
       ellipse at 58% 52%,
-      color-mix(in srgb, var(--color-paper) 48%, transparent),
+      color-mix(in srgb, var(--color-beige) 18%, transparent),
       transparent 74%
     );
     filter: blur(1.25rem);
@@ -1285,15 +1305,15 @@
     );
     display: grid;
     max-width: clamp(76rem, 92vw, 112rem);
-    grid-template-columns: minmax(18rem, 0.48fr) minmax(0, 1.52fr);
-    gap: clamp(3rem, 8vw, 11rem);
+    grid-template-columns: minmax(22rem, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(3rem, 6vw, 8rem);
     align-items: end;
     min-height: clamp(32rem, 42vw, 38rem);
   }
 
   .venue-copy {
     align-self: start;
-    max-width: 31rem;
+    max-width: 36rem;
   }
 
   .venue-space {
@@ -1318,7 +1338,7 @@
 
   .venue-copy address {
     max-width: 29rem;
-    margin-top: 2.25rem;
+    margin-top: 1.75rem;
     font-style: normal;
     color: color-mix(in srgb, var(--color-charcoal) 72%, transparent);
   }
@@ -1364,7 +1384,7 @@
 
   .rsvp-heading h2 {
     max-width: 11ch;
-    margin-top: clamp(3rem, 7vw, 6rem);
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
     font-family: var(--font-display);
     font-size: clamp(3rem, 6vw, 6.2rem);
     font-weight: 400;
@@ -1375,7 +1395,7 @@
 
   .rsvp-intro {
     max-width: 34rem;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     color: var(--color-on-olive-muted);
   }
 
@@ -1468,7 +1488,7 @@
     }
 
     .venue-grid {
-      grid-template-columns: minmax(11.5rem, 0.55fr) minmax(0, 1.45fr);
+      grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 1.2fr);
     }
   }
 

@@ -93,7 +93,6 @@ export const site = {
   /* -------------------------------------------------------------- sections */
 
   hero: {
-    /** Small line above the names. */
     overline: "Düğünümüze davetlisiniz",
     /** Understated call to action that scrolls to the RSVP section. */
     ctaLabel: "Katılım Bildir",
@@ -101,7 +100,7 @@ export const site = {
     scrollHint: "Aşağı kaydırın",
     navigation: {
       invitation: "Davet",
-      weddingDay: "Düğün Günü",
+      weddingDay: "Program",
       venue: "Mekân",
       rsvp: "Katılım",
     },
@@ -131,8 +130,8 @@ export const site = {
     overline: "Mekân",
     heading: "Aden Boğazköy Tesisleri",
     spaceLabel: "Camlı Köşk · Arnavutköy",
-    /** External link to Google Maps driving directions. */
-    directionsLabel: "Google Maps'te Yol Tarifi Al",
+    /** External link to maps driving directions. */
+    directionsLabel: "Yol Tarifi Al",
     /** Accessible title for the embedded map iframe. */
     mapTitle: "Aden Boğazköy Tesisleri konumunu gösteren Google Haritalar haritası",
   },
@@ -143,7 +142,7 @@ export const site = {
     overline: "Katılım",
     heading: "Bizimle Olacak mısınız?",
     intro:
-      "Hazırlıklarımızı tamamlayabilmemiz için katılım durumunuzu 4 Eylül 2026 tarihine kadar bildirmenizi rica ederiz.",
+      "Hazırlıklarımızı tamamlayabilmemiz için katılım durumunuzu 20 Eylül 2026 tarihine kadar bildirmenizi rica ederiz.",
 
     /**
      * Maximum guest count offered immediately while the form fetches the same
@@ -166,7 +165,7 @@ export const site = {
     hints: {
       fullName: "Davetiyede yazan adınızı kullanabilirsiniz.",
       guestCount: "Kendiniz dâhil, size eşlik edecek toplam kişi sayısı.",
-      note: "İsteğe bağlı. Beslenme tercihiniz veya bize iletmek istediğiniz bir şey olabilir.",
+      note: "İsteğe bağlı. Bize iletmek istediğiniz herhangi bir şey olabilir.",
     },
 
     messages: {
@@ -212,6 +211,8 @@ export const site = {
    * `embedUrl`      Google Maps → the venue → Share → Embed a map → copy only the
    *                 `src="…"` value from the generated iframe and paste it here.
    * `directionsUrl` Google Maps → the venue → Directions → Share → copy the link.
+   * `mobileDirectionsUrl` A geo: URL that lets phones offer the guest's installed
+   *                       map applications.
    *
    * When `embedUrl` is empty no map or placeholder card is rendered. When
    * `directionsUrl` is empty the directions link is hidden.
@@ -220,6 +221,8 @@ export const site = {
   maps: {
     embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.144942140483!2d28.982248375473733!3d41.01591617414719!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab97532631e4f%3A0x64b024205723270d!2sAden%20Bo%C4%9Fazk%C3%B6y%20Tesisleri!5e0!3m2!1str!2str!4v1720071162130!5m2!1str!2str",
     directionsUrl: "https://www.google.com/maps?saddr=My+Location&daddr=Aden+Boğazköy+Tesisleri,+Boğazköy+İstiklal,+Arnavutköy+Habibler+Yolu+No:1266,+34275+Arnavutköy%2Fİstanbul/",
+    mobileDirectionsUrl:
+      "geo:41.01591617414719,28.982248375473733?q=41.01591617414719,28.982248375473733(Aden%20Bo%C4%9Fazk%C3%B6y%20Tesisleri)",
   },
 
   /* -------------------------------------------------------------- metadata */

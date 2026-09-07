@@ -1,5 +1,6 @@
-import { EntranceMotion } from "@/components/motion/Choreography";
+import { EntranceMotion, LineDraw } from "@/components/motion/Choreography";
 import { site } from "@/config/site";
+import { VenueDirections } from "./VenueDirections";
 
 export function VenueMap() {
   const { venue, venueSection, maps, artwork } = site;
@@ -9,15 +10,19 @@ export function VenueMap() {
     <section id="mekan" className="venue-composition" aria-labelledby="venue-title">
       <div className="shell venue-grid">
         <EntranceMotion entrance="from-left" className="venue-copy">
-          <p className="overline text-olive">{venueSection.overline}</p>
+          <p className="section-kicker text-olive">{venueSection.overline}</p>
+          <LineDraw className="editorial-line section-kicker-line" delay={0.1} />
           <p className="venue-space">{venueSection.spaceLabel}</p>
           <h2 id="venue-title">{venueSection.heading}</h2>
+          <LineDraw className="editorial-line section-title-line" delay={0.12} />
           <address>{venue.address}</address>
 
           {hasDirections ? (
-            <a className="venue-directions" href={maps.directionsUrl} target="_blank" rel="noopener noreferrer">
-              {venueSection.directionsLabel}<span aria-hidden>↗</span>
-            </a>
+            <VenueDirections
+              href={maps.directionsUrl}
+              mobileHref={maps.mobileDirectionsUrl}
+              label={venueSection.directionsLabel}
+            />
           ) : null}
         </EntranceMotion>
 
