@@ -61,6 +61,7 @@ const VIEWPORTS = [
   { name: "430x932", width: 430, height: 932, dsf: 1, mobile: false },
   { name: "768x1024", width: 768, height: 1024, dsf: 1, mobile: false },
   { name: "1440x900", width: 1440, height: 900, dsf: 1, mobile: false },
+  { name: "1920x1080", width: 1920, height: 1080, dsf: 1, mobile: false },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -280,6 +281,19 @@ const MEASURE = `(() => {
   const venueDetailFrame = document.querySelector('#mekan .venue-art-crop');
   const vdfb = venueDetailFrame && venueDetailFrame.getBoundingClientRect();
   const venueDetailStyle = venueDetail && getComputedStyle(venueDetail);
+  const venueCopy = document.querySelector('#mekan .venue-copy');
+  const vcb = venueCopy && venueCopy.getBoundingClientRect();
+  const venueTitle = document.querySelector('#mekan .venue-copy h2');
+  const venueTitleWordsUnbroken = venueTitle ? (() => {
+    const node = venueTitle.firstChild;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return false;
+    return [...node.textContent.matchAll(/\S+/g)].every((match) => {
+      const range = document.createRange();
+      range.setStart(node, match.index);
+      range.setEnd(node, match.index + match[0].length);
+      return range.getClientRects().length === 1;
+    });
+  })() : false;
   /* The honeypot is parked off-screen and is never focused or tapped, so it is
      excluded from the touch-target and font-size checks. */
   const controls = [...document.querySelectorAll('#katilim .field-input, #katilim label.choice, #katilim button[type=submit]')]
@@ -303,12 +317,19 @@ const MEASURE = `(() => {
     heroAboveFold: cb && hb ? (hb.bottom <= de.clientHeight + 1 && cb.bottom <= de.clientHeight) : null,
     venueDetail: vdb && {
       w: Math.round(vdb.width), h: Math.round(vdb.height),
+      right: Math.round(vdb.right),
+      rightEdgeGap: Math.round(vw - vdb.right),
       fileServed: (venueDetail.currentSrc || venueDetail.getAttribute('src') || '').split('/').pop(),
       aspect: Number((vdb.width / vdb.height).toFixed(3)),
+      pctOfViewportWidth: Math.round(vdb.width / vw * 100),
+      gapFromCopy: vcb ? Math.round(vdb.left - vcb.right) : null,
       containedInFrame: Boolean(vdfb && vdb.left >= vdfb.left - 1 && vdb.right <= vdfb.right + 1),
       featheredSides: venueDetailStyle?.maskImage !== 'none',
+      fadesOnMultipleEdges: (venueDetailStyle?.maskImage.match(/linear-gradient/g) || []).length >= 2,
     },
     venueMapPanelPresent: Boolean(document.querySelector('#mekan .venue-map, #mekan iframe')),
+    venueTitleHasEditorialLine: Boolean(document.querySelector('#mekan .editorial-line')),
+    venueTitleWordsUnbroken,
     formControls: controls,
     smallestTypedFieldFontSize: typedFields.length ? Math.min(...typedFields.map(i => i.fontSize)) : null,
     smallestControlHeight: controls.length ? Math.min(...controls.map(i => i.h)) : null,
@@ -951,9 +972,30 @@ try {
       `${name}: venue artwork keeps its full aspect ratio inside a feathered frame`,
       Math.abs((m.venueDetail?.aspect ?? 0) - 1.5) <= 0.01 &&
         m.venueDetail?.containedInFrame === true &&
-        m.venueDetail?.featheredSides === true,
+        m.venueDetail?.featheredSides === true &&
+        m.venueDetail?.fadesOnMultipleEdges === true,
       JSON.stringify(m.venueDetail),
     );
+    check(
+      `${name}: venue artwork reaches the right viewport edge`,
+      Math.abs(m.venueDetail?.rightEdgeGap ?? 999) <= 1,
+      `${m.venueDetail?.rightEdgeGap ?? "missing"}px from edge`,
+    );
+    check(
+      `${name}: venue interior is a substantial visual moment`,
+      (m.venueDetail?.pctOfViewportWidth ?? 0) >= (m.viewport.w < 480 ? 90 : m.viewport.w >= 1600 ? 45 : m.viewport.w >= 1200 ? 50 : 55),
+      `${m.venueDetail?.pctOfViewportWidth ?? 0}% of viewport width`,
+    );
+    if (m.viewport.w >= 768) {
+      const minimumVenueGap = Math.min(160, Math.max(48, m.viewport.w * 0.07));
+      check(
+        `${name}: venue artwork separates fluidly from the title column`,
+        (m.venueDetail?.gapFromCopy ?? 0) >= minimumVenueGap,
+        `${m.venueDetail?.gapFromCopy ?? 0}px gap; needs ${Math.round(minimumVenueGap)}px`,
+      );
+    }
+    check(`${name}: venue title treatment has no editorial rule`, m.venueTitleHasEditorialLine === false);
+    check(`${name}: venue title never splits a word`, m.venueTitleWordsUnbroken === true);
     check(
       `${name}: hero loads the art-directed source for this breakpoint`,
       m.illustration?.fileServed === (m.viewport.w < 1120 ? "venue-hero-mobile-master.webp" : "venue-hero-desktop-master.webp"),

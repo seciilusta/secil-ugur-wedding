@@ -1,4 +1,4 @@
-import { EntranceMotion, LineDraw } from "@/components/motion/Choreography";
+import { EntranceMotion } from "@/components/motion/Choreography";
 import { site } from "@/config/site";
 
 export function VenueMap() {
@@ -10,7 +10,6 @@ export function VenueMap() {
       <div className="shell venue-grid">
         <EntranceMotion entrance="from-left" className="venue-copy">
           <p className="overline text-olive">{venueSection.overline}</p>
-          <LineDraw className="editorial-line" delay={0.1} />
           <p className="venue-space">{venueSection.spaceLabel}</p>
           <h2 id="venue-title">{venueSection.heading}</h2>
           <address>{venue.address}</address>
