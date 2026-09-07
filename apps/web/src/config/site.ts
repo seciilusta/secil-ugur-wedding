@@ -170,6 +170,7 @@ export const site = {
     },
 
     messages: {
+      successSent: "Yanıtınız gönderildi.",
       successAttending: "Teşekkür ederiz, sizi aramızda görmek bizi çok mutlu edecek.",
       successNotAttending: "Bildirdiğiniz için teşekkür ederiz, sizi o akşam çok özleyeceğiz.",
       successUpdated: "Yanıtınız güncellendi.",

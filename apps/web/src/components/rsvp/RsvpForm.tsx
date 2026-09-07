@@ -157,7 +157,11 @@ export function RsvpForm() {
         website: values.website,
       });
 
-      setResult(submitted);
+      // The API can report an upsert as "updated" when this browser has an
+      // older token persisted locally. For the guest, their first submission
+      // in this form is still a send; only a subsequent edit should use the
+      // update confirmation.
+      setResult({ ...submitted, status: hasSubmittedOnce ? "updated" : "created" });
       setHasSubmittedOnce(true);
     } catch (error: unknown) {
       if (error instanceof RsvpError) {
@@ -176,9 +180,7 @@ export function RsvpForm() {
     const successMessage =
       result.status === "updated"
         ? messages.successUpdated
-        : result.attendance === "yes"
-          ? messages.successAttending
-          : messages.successNotAttending;
+        : messages.successSent;
 
     return (
       <AnimatePresence mode="wait">
