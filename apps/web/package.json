@@ -2,7 +2,7 @@
   "name": "web",
   "version": "1.0.0",
   "private": true,
-  "description": "Static single-page wedding website for Seçil & Uğur. Exports to out/ and can be hosted on any static web server.",
+  "description": "Wedding website and serverless RSVP API for Seçil & Uğur.",
   "engines": {
     "node": ">=22"
   },
@@ -12,11 +12,14 @@
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "serve": "npx --yes serve out -l 3000",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "artwork": "node scripts/optimize-artwork.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "@neondatabase/serverless": "^1.1.0",
+    "drizzle-orm": "^0.45.2",
     "motion": "^13.1.1",
     "next": "16.3.3",
     "react": "19.2.8",
@@ -29,6 +32,7 @@
     "@types/node": "^22.20.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.3",
     "sharp": "^0.35.4",

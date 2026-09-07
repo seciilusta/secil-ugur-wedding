@@ -2,8 +2,7 @@
  * Every editable piece of wedding information and website copy lives here.
  *
  * This is the only file you need to touch to change what the website says.
- * Nothing in this file is deployment-dependent — the RSVP API location lives in
- * `public/runtime-config.json` instead, so it can be changed without a rebuild.
+ * Deployment secrets live in the hosting environment and never in this file.
  *
  * Colours, typography and spacing live in `src/app/globals.css`.
  */
@@ -147,9 +146,8 @@ export const site = {
       "Hazırlıklarımızı tamamlayabilmemiz için katılım durumunuzu 4 Eylül 2026 tarihine kadar bildirmenizi rica ederiz.",
 
     /**
-     * Maximum guest count offered by the form. The authoritative limit lives in
-     * the API's `RSVP_MAX_GUESTS` environment variable — keep the two values equal,
-     * otherwise the form will offer a number the API rejects.
+     * Maximum guest count offered immediately while the form fetches the same
+     * authoritative limit from the server.
      */
     maxGuests: 10,
 
@@ -193,9 +191,6 @@ export const site = {
       server: "Bir şeyler ters gitti. Lütfen birkaç dakika sonra tekrar deneyin.",
       validation: "Gönderdiğiniz bilgilerde bir sorun var. Lütfen alanları kontrol edin.",
       rateLimited: "Çok fazla deneme yapıldı. Lütfen biraz bekleyip tekrar deneyin.",
-      /** Shown when `runtime-config.json` is missing or malformed. */
-      configMissing:
-        "Katılım formu şu anda yüklenemedi. Site yapılandırması eksik görünüyor. Lütfen daha sonra tekrar deneyin.",
       retry: "Tekrar Dene",
     },
 

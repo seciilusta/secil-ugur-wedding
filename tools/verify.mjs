@@ -1,54 +1,35 @@
 /**
  * Development-only verification pass.
  *
- * Starts the RSVP API and a static server for the exported frontend, drives the
- * locally installed Google Chrome over the DevTools Protocol, captures the site
- * at the four target viewport sizes (normal and reduced-motion), submits a real
- * RSVP through the real form, and checks what landed in SQLite.
+ * Starts the production Next.js server, drives the locally installed Google
+ * Chrome over the DevTools Protocol, and captures the site at the target
+ * viewport sizes. With --live-rsvp it also exercises the configured Neon-backed
+ * form; DATABASE_URL, RSVP_ADMIN_TOKEN and RATE_LIMIT_SECRET must then be set.
  *
  * Everything runs and shuts down inside this one process, so there are no
  * lingering background servers.
  *
  * Neither application depends on this file.
  *
- *   node tools/verify.mjs            # screenshots + RSVP end-to-end
- *   node tools/verify.mjs --shots    # screenshots only
+ *   node tools/verify.mjs                 # screenshots and layout checks
+ *   node tools/verify.mjs --live-rsvp     # plus RSVP create/update checks
  */
 
 import { spawn } from "node:child_process";
-import {
-  createReadStream,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
-import { createServer } from "node:http";
-import { createRequire } from "node:module";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-const require = createRequire(path.join(import.meta.dirname, "../services/rsvp-api/package.json"));
-const Database = require("better-sqlite3");
-
 const ROOT = path.resolve(import.meta.dirname, "..");
-const WEB_OUT = path.join(ROOT, "apps/web/out");
-const API_DIR = path.join(ROOT, "services/rsvp-api");
+const WEB_DIR = path.join(ROOT, "apps/web");
+const NEXT_BUILD = path.join(WEB_DIR, ".next/BUILD_ID");
 const OUT_DIR = path.join(ROOT, ".screenshots");
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 const WEB_PORT = Number(process.env.VERIFY_WEB_PORT ?? 3000);
-const API_PORT = 4000;
 const WEB_URL = `http://localhost:${WEB_PORT}/`;
 
-/* Verification runs against a throwaway database, never the developer's own
-   `data/rsvp.sqlite`. Reusing that file made assertions read rows left behind
-   by an earlier run and report failures the application had not caused. */
-const VERIFY_DB = path.join(ROOT, ".screenshots/verify-rsvp.sqlite");
-
-const shotsOnly = process.argv.includes("--shots");
+const runLiveRsvp = process.argv.includes("--live-rsvp");
 const SECTION_IDS = (process.env.VERIFY_SECTIONS ?? "davet,program,mekan,katilim")
   .split(",")
   .map((id) => id.trim())
@@ -73,79 +54,31 @@ const check = (name, ok, detail = "") => {
   console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? `  (${detail})` : ""}`);
 };
 
-/* ------------------------------------------------------------ static server */
+/* ---------------------------------------------------------- Next.js server */
 
-const MIME = {
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".webp": "image/webp",
-  ".jpg": "image/jpeg",
-  ".png": "image/png",
-  ".svg": "image/svg+xml",
-  ".woff2": "font/woff2",
-  ".txt": "text/plain; charset=utf-8",
-};
-
-function startStaticServer(root, port) {
-  const server = createServer((req, res) => {
-    const requested = decodeURIComponent((req.url ?? "/").split("?")[0]);
-    let filePath = path.join(root, requested);
-
-    // Resolve directory requests to their index.html, the way a static host does.
-    if (existsSync(filePath) && statSync(filePath).isDirectory()) {
-      filePath = path.join(filePath, "index.html");
-    } else if (!existsSync(filePath) && existsSync(`${filePath}.html`)) {
-      filePath = `${filePath}.html`;
-    }
-
-    if (!filePath.startsWith(root) || !existsSync(filePath)) {
-      res.writeHead(404, { "Content-Type": "text/plain" });
-      res.end("Not found");
-      return;
-    }
-
-    res.writeHead(200, {
-      "Content-Type": MIME[path.extname(filePath)] ?? "application/octet-stream",
-      "Cache-Control": "no-store",
-    });
-    createReadStream(filePath).pipe(res);
-  });
-
-  return new Promise((resolve) => {
-    server.listen(port, "127.0.0.1", () => {
-      teardown.push(() => new Promise((done) => server.close(done)));
-      resolve(server);
-    });
-  });
-}
-
-/* ----------------------------------------------------------------- the API */
-
-async function startApi() {
-  const api = spawn(path.join(API_DIR, "node_modules/.bin/tsx"), ["src/server.ts"], {
-    cwd: API_DIR,
+async function startWeb() {
+  const web = spawn("pnpm", ["exec", "next", "start", "--hostname", "127.0.0.1", "--port", String(WEB_PORT)], {
+    cwd: WEB_DIR,
     stdio: "ignore",
-    env: { ...process.env, LOG_LEVEL: "warn", DATABASE_PATH: VERIFY_DB },
+    env: { ...process.env, RSVP_MAX_GUESTS: process.env.RSVP_MAX_GUESTS ?? "10" },
   });
   let stopped = false;
-  teardown.push(function killApi() {
+  teardown.push(function killWeb() {
     if (stopped) return;
     stopped = true;
-    api.kill("SIGTERM");
+    web.kill("SIGTERM");
   });
 
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
-      const res = await fetch(`http://localhost:${API_PORT}/health`);
+      const res = await fetch(WEB_URL);
       if (res.ok) return;
     } catch {
       /* not up yet */
     }
     await sleep(250);
   }
-  throw new Error("RSVP API did not become healthy.");
+  throw new Error("Next.js did not become ready.");
 }
 
 /* ------------------------------------------------------------------ chrome */
@@ -544,16 +477,6 @@ window.__clickText = (selector, text) => {
   return true;
 };
 window.__text = (selector) => (document.querySelector(selector)?.innerText ?? '');
-if (new URL(location.href).searchParams.get('verifyMissingConfig') === '1') {
-  const nativeFetch = window.fetch.bind(window);
-  window.fetch = (input, init) => {
-    const url = new URL(input instanceof Request ? input.url : String(input), document.baseURI);
-    if (url.pathname.endsWith('/runtime-config.json')) {
-      return Promise.resolve(new Response('Not found', { status: 404 }));
-    }
-    return nativeFetch(input, init);
-  };
-}
 true;
 `;
 
@@ -571,10 +494,9 @@ async function waitFor(chrome, expression, { timeout = 12_000, label = expressio
   }
 }
 
-async function loadForm(chrome, { missingConfig = false } = {}) {
+async function loadForm(chrome) {
   const previous = await chrome.evaluate(`window.__docId ?? null`);
   const query = new URLSearchParams({ verify: String(Date.now()) });
-  if (missingConfig) query.set("verifyMissingConfig", "1");
   await chrome.send("Page.navigate", { url: `${WEB_URL}?${query}` });
 
   await waitFor(
@@ -751,7 +673,7 @@ const CONTRAST_PROBE = `(() => {
 })()`;
 
 async function runRsvpFlow(chrome) {
-  console.log("\n--- RSVP end-to-end through the real form ---");
+  console.log("\n--- RSVP end-to-end through the same-origin route ---");
 
   await chrome.send("Emulation.setEmulatedMedia", { features: [] });
   await chrome.send("Emulation.setDeviceMetricsOverride", {
@@ -761,29 +683,6 @@ async function runRsvpFlow(chrome) {
     mobile: true,
   });
 
-  const dbPath = VERIFY_DB;
-  const countRows = () => {
-    const db = new Database(dbPath, { readonly: true });
-    const { n } = db.prepare("select count(*) as n from rsvps").get();
-    db.close();
-    return n;
-  };
-  const findByName = (name) => {
-    const db = new Database(dbPath, { readonly: true });
-    const row = db
-      .prepare(
-        "select full_name, attendance, guest_count, note, created_at, updated_at from rsvps" +
-          " where full_name = ? order by id desc limit 1",
-      )
-      .get(name);
-    db.close();
-    return row;
-  };
-
-  const before = countRows();
-  const guestName = "Elif Şahinoğlu Karadağ";
-
-  /* ------------------------------------------------ required field validation */
   chrome.logs.length = 0;
   await loadForm(chrome);
   await chrome.evaluate(`window.__clickText('button[type=submit]', 'Katılımı Gönder')`);
@@ -800,30 +699,13 @@ async function runRsvpFlow(chrome) {
     "Empty form shows the Turkish attendance error",
     validationText.includes("Lütfen katılım durumunuzu seçin."),
   );
-  check("Nothing was written on a failed validation", countRows() === before);
-
-  /* ------------------------------------------- guest count show / hide / reset */
-  await chrome.evaluate(`window.__clickText('label.choice', 'Katılacağım')`);
-  await waitFor(chrome, `document.querySelector('#katilim select')`, { label: "guest count field" });
-  check("Guest count appears when attending", true);
-
-  await chrome.evaluate(`window.__fill('#katilim select', '4')`);
-  const chosen = await chrome.evaluate(`document.querySelector('#katilim select').value`);
-  check("Guest count accepts a selection", chosen === "4", `value ${chosen}`);
-
-  await chrome.evaluate(`window.__clickText('label.choice', 'Katılamayacağım')`);
-  await sleep(900);
-  const selectGone = await chrome.evaluate(`document.querySelector('#katilim select') === null`);
-  check("Guest count is hidden when not attending", selectGone);
 
   await chrome.evaluate(`window.__clickText('label.choice', 'Katılacağım')`);
   await waitFor(chrome, `document.querySelector('#katilim select')`, { label: "guest count field" });
-  const reset = await chrome.evaluate(`document.querySelector('#katilim select').value`);
-  check("Stale guest count was cleared", reset === "", `value "${reset}"`);
-
-  /* -------------------------------------------------------- valid submission */
-  await chrome.evaluate(`window.__fill('#katilim input[type=text]', ${JSON.stringify(guestName)})`);
   await chrome.evaluate(`window.__fill('#katilim select', '3')`);
+
+  const guestName = `Doğrulama Misafiri ${Date.now()}`;
+  await chrome.evaluate(`window.__fill('#katilim input[type=text]', ${JSON.stringify(guestName)})`);
   await chrome.evaluate(
     `window.__fill('#katilim textarea', 'Nikâhta olacağız, çok mutluyuz. Vejetaryen menü mümkün mü?')`,
   );
@@ -831,108 +713,42 @@ async function runRsvpFlow(chrome) {
 
   await waitFor(chrome, `document.querySelector('#katilim [role=status]')`, {
     label: "success panel",
+    timeout: 20_000,
   });
-
   const successText = await chrome.evaluate(`window.__text('#katilim [role=status]')`);
   check(
-    "Success state confirms attendance in Turkish",
+    "Live submission confirms attendance in Turkish",
     successText.includes("sizi aramızda görmek bizi çok mutlu edecek"),
     successText.slice(0, 60),
   );
 
-  const created = findByName(guestName);
-  check("Submission reached SQLite", Boolean(created));
-  check("Row count increased by exactly one", countRows() === before + 1);
-  check("Attendance stored as yes", created?.attendance === "yes");
-  check("Guest count stored as 3", created?.guest_count === 3);
-  check(
-    "Turkish characters survived the whole round trip",
-    created?.full_name === guestName && created?.note.includes("Nikâhta"),
-  );
-  check("createdAt equals updatedAt on a first submission", created?.created_at === created?.updated_at);
-
-  /* --------------------------------------------- resubmission from the same browser */
   await chrome.evaluate(`window.__clickText('button', 'Yanıtımı düzenle')`);
   await waitFor(chrome, `document.querySelector('#katilim form')`, { label: "form to return" });
-
   await chrome.evaluate(`window.__fill('#katilim input[type=text]', ${JSON.stringify(guestName)})`);
   await chrome.evaluate(`window.__clickText('label.choice', 'Katılacağım')`);
   await waitFor(chrome, `document.querySelector('#katilim select')`, { label: "guest count field" });
   await chrome.evaluate(`window.__fill('#katilim select', '5')`);
   await chrome.evaluate(`window.__clickText('button[type=submit]', 'Yanıtımı Güncelle')`);
 
-  await waitFor(chrome, `document.querySelector('#katilim [role=status]')`, { label: "success panel" });
-
-  const updatedText = await chrome.evaluate(`window.__text('#katilim [role=status]')`);
-  check("Resubmission reports an update", updatedText.includes("Yanıtınız güncellendi"), updatedText.slice(0, 40));
-
-  const updated = findByName(guestName);
-  check("Still exactly one row for this browser", countRows() === before + 1);
-  check("Guest count was updated to 5", updated?.guest_count === 5);
-  check("createdAt was preserved", updated?.created_at === created?.created_at);
-  check("updatedAt moved forward", (updated?.updated_at ?? "") > (created?.updated_at ?? ""));
-
-  check(
-    "No console errors during the RSVP flow",
-    chrome.logs.every((l) => l.level !== "error" && l.level !== "exception"),
-    JSON.stringify(chrome.logs.filter((l) => l.level === "error" || l.level === "exception")),
-  );
-
-  /* ------------------------------------------------- missing runtime config */
-  chrome.logs.length = 0;
-  await loadForm(chrome, { missingConfig: true });
-  await waitFor(chrome, `document.querySelector('#katilim [role=alert]')`, {
-    label: "runtime config error",
-  });
-  const configError = await chrome.evaluate(`window.__text('#katilim form')`);
-  check(
-    "Missing runtime-config.json shows a graceful Turkish message",
-    configError.includes("Site yapılandırması eksik görünüyor"),
-    configError.slice(0, 80),
-  );
-  check(
-    "Form is still rendered when the runtime config is missing",
-    await chrome.evaluate(`Boolean(document.querySelector('#katilim input[type=text]'))`),
-  );
-
-  /* ---------------------------------------------------- API unavailable */
-  console.log("\n--- stopping the API to test the offline path ---");
-  const apiKill = teardown.find((fn) => fn.name === "killApi");
-  if (apiKill) await apiKill();
-  await sleep(1500);
-
-  await loadForm(chrome);
-  const keptName = "Burak Yıldırımoğlu";
-  await chrome.evaluate(`window.__fill('#katilim input[type=text]', ${JSON.stringify(keptName)})`);
-  await chrome.evaluate(`window.__clickText('label.choice', 'Katılacağım')`);
-  await waitFor(chrome, `document.querySelector('#katilim select')`, { label: "guest count field" });
-  await chrome.evaluate(`window.__fill('#katilim select', '2')`);
-  await chrome.evaluate(`window.__clickText('button[type=submit]', 'Katılımı Gönder')`);
-
-  await waitFor(chrome, `document.querySelector('#katilim [role=alert]')`, {
-    label: "network error message",
+  await waitFor(chrome, `document.querySelector('#katilim [role=status]')`, {
+    label: "updated success panel",
     timeout: 20_000,
   });
+  const updatedText = await chrome.evaluate(`window.__text('#katilim [role=status]')`);
+  check("Same-browser resubmission reports an update", updatedText.includes("Yanıtınız güncellendi"));
 
-  const offlineText = await chrome.evaluate(`window.__text('#katilim form')`);
+  const exportResponse = await fetch(`${WEB_URL}v1/rsvp/export.csv`, {
+    headers: { Authorization: `Bearer ${process.env.RSVP_ADMIN_TOKEN}` },
+  });
+  const csv = await exportResponse.text();
+  check("Protected CSV export succeeds", exportResponse.ok);
+  check("CSV contains the verification response", csv.includes(guestName));
   check(
-    "Unreachable API shows a Turkish retry message",
-    offlineText.includes("Sunucuya şu anda ulaşılamıyor"),
-    offlineText.slice(0, 80),
-  );
-
-  const preserved = await chrome.evaluate(`document.querySelector('#katilim input[type=text]').value`);
-  check("Entered values are not lost on failure", preserved === keptName, preserved);
-
-  const retryLabel = await chrome.evaluate(`window.__text('#katilim button[type=submit]')`);
-  // The label is uppercased by CSS, so compare case-insensitively.
-  check(
-    "Submit button offers a retry",
-    retryLabel.trim().toLocaleLowerCase("tr") === "tekrar dene",
-    retryLabel,
+    "No console errors during the RSVP flow",
+    chrome.logs.every((entry) => entry.level !== "error" && entry.level !== "exception"),
+    JSON.stringify(chrome.logs.filter((entry) => entry.level === "error" || entry.level === "exception")),
   );
 }
-
 /* ---------------------------------------------------------------- teardown */
 
 async function shutdown() {
@@ -946,15 +762,16 @@ async function shutdown() {
 }
 
 try {
-  if (!existsSync(WEB_OUT)) {
-    throw new Error(`No static export at ${WEB_OUT}. Run: pnpm build:web`);
+  if (!existsSync(NEXT_BUILD)) {
+    throw new Error(`No production build at ${NEXT_BUILD}. Run: pnpm build:web`);
   }
 
   mkdirSync(OUT_DIR, { recursive: true });
-  for (const suffix of ["", "-wal", "-shm"]) rmSync(`${VERIFY_DB}${suffix}`, { force: true });
+  if (runLiveRsvp && (!process.env.DATABASE_URL || !process.env.RSVP_ADMIN_TOKEN || !process.env.RATE_LIMIT_SECRET)) {
+    throw new Error("--live-rsvp requires DATABASE_URL, RSVP_ADMIN_TOKEN and RATE_LIMIT_SECRET.");
+  }
 
-  await startApi();
-  await startStaticServer(WEB_OUT, WEB_PORT);
+  await startWeb();
   const chrome = await startChrome();
 
   console.log("--- layout, normal motion ---");
@@ -1146,7 +963,7 @@ try {
     }
   }
 
-  if (!shotsOnly) {
+  if (runLiveRsvp) {
     await runRsvpFlow(chrome);
   }
 

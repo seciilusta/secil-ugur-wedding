@@ -123,12 +123,9 @@ export function RsvpForm() {
         if (active) setMaxGuests(config.maxGuests);
       })
       .catch((error: unknown) => {
-        // A missing or malformed runtime-config.json is worth telling the guest
-        // about up front, because no submission can ever succeed. Anything else
-        // (API asleep, flaky network) stays quiet until they actually submit.
-        if (active && error instanceof RsvpError && error.kind === "config") {
-          setFormError({ message: error.message, retryable: false });
-        }
+        // The default remains usable while a sleeping function or transient
+        // network failure recovers. Submission surfaces persistent failures.
+        void error;
       });
 
     return () => {
@@ -164,7 +161,7 @@ export function RsvpForm() {
       setHasSubmittedOnce(true);
     } catch (error: unknown) {
       if (error instanceof RsvpError) {
-        setFormError({ message: error.message, retryable: error.kind !== "config" });
+        setFormError({ message: error.message, retryable: true });
       } else {
         setFormError({ message: copy.server, retryable: true });
       }

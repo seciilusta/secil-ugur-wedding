@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { site } from "@/config/site";
-import { loadRuntimeConfig, RuntimeConfigError } from "@/lib/runtime-config";
 
 /**
  * The only place in the frontend that talks HTTP to the RSVP API.
@@ -10,7 +9,7 @@ import { loadRuntimeConfig, RuntimeConfigError } from "@/lib/runtime-config";
  * database logic here and no admin credential ever reaches this file: the CSV
  * export is protected by a bearer token that lives only on the server.
  *
- * The wire contract is documented in `services/rsvp-api/README.md`.
+ * The wire contract is documented in the repository README.
  */
 
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -41,7 +40,7 @@ export interface RsvpPublicConfig {
 }
 
 /** Every failure the form has to be able to explain to a guest. */
-export type RsvpErrorKind = "config" | "network" | "timeout" | "validation" | "rateLimited" | "server";
+export type RsvpErrorKind = "network" | "timeout" | "validation" | "rateLimited" | "server";
 
 export class RsvpError extends Error {
   readonly kind: RsvpErrorKind;
@@ -118,23 +117,8 @@ export function getSubmissionToken(): string {
 
 /* ------------------------------------------------------------------ fetch */
 
-function buildApiUrl(baseUrl: string, path: string): URL {
-  // Guarantees exactly one slash between the base and the path regardless of how
-  // the base URL was written in runtime-config.json.
-  const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-  return new URL(path.replace(/^\/+/, ""), normalizedBase);
-}
-
-async function resolveApiUrl(path: string): Promise<URL> {
-  try {
-    const config = await loadRuntimeConfig();
-    return buildApiUrl(config.rsvpApiBaseUrl, path);
-  } catch (cause) {
-    if (cause instanceof RuntimeConfigError) {
-      throw new RsvpError("config", site.rsvp.errors.configMissing, { cause });
-    }
-    throw new RsvpError("config", site.rsvp.errors.configMissing, { cause });
-  }
+function resolveApiUrl(path: string): URL {
+  return new URL(path.startsWith("/") ? path : `/${path}`, window.location.origin);
 }
 
 async function requestJson(url: URL, init: RequestInit): Promise<unknown> {
@@ -188,7 +172,7 @@ async function requestJson(url: URL, init: RequestInit): Promise<unknown> {
  * `site.rsvp.maxGuests` so a guest can still fill it in.
  */
 export async function fetchRsvpConfig(): Promise<RsvpPublicConfig> {
-  const url = await resolveApiUrl("v1/rsvp/config");
+  const url = resolveApiUrl("v1/rsvp/config");
   const payload = await requestJson(url, { method: "GET", headers: { Accept: "application/json" } });
 
   const parsed = publicConfigSchema.safeParse(payload);
@@ -200,7 +184,7 @@ export async function fetchRsvpConfig(): Promise<RsvpPublicConfig> {
 
 /** Submits or updates this browser's RSVP. */
 export async function submitRsvp(submission: RsvpSubmission): Promise<RsvpResult> {
-  const url = await resolveApiUrl("v1/rsvp");
+  const url = resolveApiUrl("v1/rsvp");
 
   const payload = await requestJson(url, {
     method: "POST",
