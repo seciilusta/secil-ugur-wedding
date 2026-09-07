@@ -17,5 +17,8 @@
     "test": "pnpm -r test",
     "db:generate": "pnpm --filter web db:generate",
     "db:migrate": "pnpm --filter web db:migrate"
+  },
+  "devDependencies": {
+    "next": "16.3.3"
   }
 }
