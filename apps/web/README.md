@@ -36,7 +36,8 @@ Never commit the resulting secrets.
 
 ## Environment
 
-- `DATABASE_URL`: Neon Postgres URL
+- `DATABASE_URL`: pooled Neon Postgres URL used by the RSVP runtime
+- `DATABASE_URL_UNPOOLED`: optional direct Neon URL preferred for migrations
 - `RSVP_ADMIN_TOKEN`: secret used by the CSV export
 - `RATE_LIMIT_SECRET`: secret HMAC key for client-address fingerprints
 - `RSVP_MAX_GUESTS`: optional, defaults to 10
@@ -44,8 +45,9 @@ Never commit the resulting secrets.
 ## Deployment
 
 Create a Vercel project rooted at this directory, connect Neon through the
-Vercel Marketplace, configure the secrets, run `pnpm db:migrate`, and deploy
-the repository's default branch.
+Vercel Marketplace, configure the secrets, and deploy the repository's default
+branch. The Vercel build applies checked-in Drizzle migrations before building
+the app.
 
 The form posts to `/v1/rsvp` on the current origin. No API base URL or CORS
 allowlist is needed.

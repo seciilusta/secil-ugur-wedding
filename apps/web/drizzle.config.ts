@@ -6,7 +6,7 @@ try {
   // Vercel and CI inject DATABASE_URL directly; a local file is optional.
 }
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
 
 export default defineConfig({
   dialect: "postgresql",
