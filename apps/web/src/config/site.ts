@@ -206,13 +206,10 @@ export const site = {
   /* ------------------------------------------------------------------ maps */
 
   /**
-   * Both fields start empty on purpose.
-   *
    * `embedUrl`      Google Maps → the venue → Share → Embed a map → copy only the
    *                 `src="…"` value from the generated iframe and paste it here.
    * `directionsUrl` Google Maps → the venue → Directions → Share → copy the link.
-   * `mobileDirectionsUrl` A geo: URL that lets phones offer the guest's installed
-   *                       map applications.
+   * `appDirections` Universal map links shown in the mobile app chooser.
    *
    * When `embedUrl` is empty no map or placeholder card is rendered. When
    * `directionsUrl` is empty the directions link is hidden.
@@ -221,8 +218,11 @@ export const site = {
   maps: {
     embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.144942140483!2d28.982248375473733!3d41.01591617414719!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab97532631e4f%3A0x64b024205723270d!2sAden%20Bo%C4%9Fazk%C3%B6y%20Tesisleri!5e0!3m2!1str!2str!4v1720071162130!5m2!1str!2str",
     directionsUrl: "https://www.google.com/maps?saddr=My+Location&daddr=Aden+Boğazköy+Tesisleri,+Boğazköy+İstiklal,+Arnavutköy+Habibler+Yolu+No:1266,+34275+Arnavutköy%2Fİstanbul/",
-    mobileDirectionsUrl:
-      "geo:41.01591617414719,28.982248375473733?q=41.01591617414719,28.982248375473733(Aden%20Bo%C4%9Fazk%C3%B6y%20Tesisleri)",
+    appDirections: {
+      appleMaps: "https://maps.apple.com/?daddr=41.01591617414719,28.982248375473733&dirflg=d",
+      googleMaps: "https://www.google.com/maps/dir/?api=1&destination=41.01591617414719,28.982248375473733",
+      waze: "https://www.waze.com/ul?ll=41.01591617414719%2C28.982248375473733&navigate=yes",
+    },
   },
 
   /* -------------------------------------------------------------- metadata */

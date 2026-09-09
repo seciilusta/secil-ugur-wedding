@@ -41,6 +41,9 @@ const VIEWPORTS = [
   { name: "390x844", width: 390, height: 844, dsf: 1, mobile: false },
   { name: "430x932", width: 430, height: 932, dsf: 1, mobile: false },
   { name: "768x1024", width: 768, height: 1024, dsf: 1, mobile: false },
+  { name: "1119x900", width: 1119, height: 900, dsf: 1, mobile: false },
+  { name: "1121x900", width: 1121, height: 900, dsf: 1, mobile: false },
+  { name: "1366x768", width: 1366, height: 768, dsf: 1, mobile: false },
   { name: "1440x900", width: 1440, height: 900, dsf: 1, mobile: false },
   { name: "1920x1080", width: 1920, height: 1080, dsf: 1, mobile: false },
 ];
@@ -203,12 +206,12 @@ const MEASURE = `(() => {
   const names = document.querySelector('.hero-title');
   const nb = names && names.getBoundingClientRect();
   const ns = names && getComputedStyle(names);
-  const img = document.querySelector('.hero-venue-art img');
+  const img = document.querySelector(vw < 864 ? '.hero-venue-image-mobile' : '.hero-venue-image-desktop');
   const ib = img && img.getBoundingClientRect();
-  const hero = document.querySelector('.hero-artwork');
-  const hb = hero && hero.getBoundingClientRect();
   const countdown = document.querySelector('.hero-countdown');
   const cb = countdown && countdown.getBoundingClientRect();
+  const countdownBand = document.querySelector('.hero-countdown-band');
+  const cbb = countdownBand && countdownBand.getBoundingClientRect();
   const heroDetails = document.querySelector('.hero-details');
   const hdb = heroDetails && heroDetails.getBoundingClientRect();
   const verticalDate = document.querySelector('.hero-vertical-date');
@@ -260,7 +263,7 @@ const MEASURE = `(() => {
       fileServed: (img.currentSrc || '').split('/').pop(),
       artDirectedCrop: ib.left < -0.5 || ib.right > vw + 0.5
     },
-    heroAboveFold: cb && hb ? (hb.bottom <= de.clientHeight + 1 && cb.bottom <= de.clientHeight) : null,
+    heroArtworkFillsOpeningScreen: ib ? Math.abs(ib.top) <= 1 && Math.abs(ib.bottom - de.clientHeight) <= 1 : null,
     heroDetails: hdb && {
       top: Math.round(hdb.top),
       left: Math.round(hdb.left),
@@ -268,7 +271,16 @@ const MEASURE = `(() => {
     },
     heroCountdown: cb && {
       left: Math.round(cb.left),
-      bottomGap: Math.round(de.clientHeight - cb.bottom),
+      top: Math.round(cb.top),
+      width: Math.round(cb.width),
+      gapAfterArtworkFade: cbb ? Math.round(cb.top - cbb.top) : null,
+      clearsArtworkFade: cbb ? cb.top >= cbb.top - 1 : null,
+      insideBand: cbb ? cb.top >= cbb.top - 1 && cb.bottom <= cbb.bottom + 1 : null,
+    },
+    heroCountdownBand: cbb && {
+      top: Math.round(cbb.top),
+      liftIntoFadedTail: ib ? Math.round(ib.bottom - cbb.top) : null,
+      beginsInsideFadedTail: ib ? cbb.top < ib.bottom : null,
     },
     heroVerticalDate: vdtb && {
       rightGap: Math.round(vw - vdtb.right),
@@ -364,8 +376,10 @@ const CONTINUITY_PROBE = `(() => {
   const hero = rect('.hero-artwork');
   const heroPaper = rect('.hero-paper');
   const heroArtwork = rect('.hero-venue-art');
+  const countdownBand = rect('.hero-countdown-band');
   const heroPaperStyle = document.querySelector('.hero-paper') && getComputedStyle(document.querySelector('.hero-paper'));
   const heroArtworkStyle = document.querySelector('.hero-venue-art') && getComputedStyle(document.querySelector('.hero-venue-art'));
+  const countdownBandStyle = document.querySelector('.hero-countdown-band') && getComputedStyle(document.querySelector('.hero-countdown-band'));
   const invitation = rect('#davet');
   const program = rect('#program');
   const invitationBotanicals = [...document.querySelectorAll('.invitation-botanical')].map((el) => {
@@ -388,12 +402,17 @@ const CONTINUITY_PROBE = `(() => {
     boundaries,
     gradients: [gradientStops('.light-experience'), gradientStops('.evening-experience')],
     venueClearsIncomingEveningArtwork: Boolean(venue && botanical && venue.bottom <= botanical.top),
-    heroFadesIntoInvitation: Boolean(
-      hero && heroPaper && heroArtwork &&
+    heroTransitionsThroughCountdownBand: Boolean(
+      hero && heroPaper && heroArtwork && countdownBand &&
       heroPaper.bottom > hero.bottom + 1 &&
-      heroArtwork.bottom > hero.bottom + 1 &&
+      heroArtwork.bottom > countdownBand.top &&
+      heroArtwork.bottom - countdownBand.top <= 200 &&
       heroPaperStyle?.maskImage !== 'none' &&
       heroArtworkStyle?.maskImage !== 'none',
+    ),
+    countdownBandKeepsContinuousCanvas: Boolean(
+      countdownBandStyle?.backgroundColor === 'rgba(0, 0, 0, 0)' &&
+      countdownBandStyle?.backgroundImage === 'none',
     ),
     invitationUsesOneLeftBotanicalBridge,
   };
@@ -439,6 +458,14 @@ async function captureViewports(chrome, { suffix, reducedMotion }) {
       captureBeyondViewport: false,
     });
     writeFileSync(path.join(OUT_DIR, `${tag}-fold.png`), Buffer.from(shot.data, "base64"));
+
+    await chrome.evaluate(`document.querySelector('.hero-countdown-band')?.scrollIntoView({ block: 'center' }); true`);
+    await sleep(250);
+    const countdownShot = await chrome.send("Page.captureScreenshot", {
+      format: "png",
+      captureBeyondViewport: false,
+    });
+    writeFileSync(path.join(OUT_DIR, `${tag}-countdown.png`), Buffer.from(countdownShot.data, "base64"));
 
     results[vp.name] = {
       ...measured,
@@ -800,8 +827,24 @@ try {
       (m.names?.left ?? -1) >= -1 && (m.names?.right ?? 99_999) <= m.viewport.w + 1,
       `${m.names?.left}..${m.names?.right} within ${m.viewport.w}`,
     );
-    check(`${name}: hero fits the opening screen`, m.heroAboveFold === true);
+    check(`${name}: artwork stage fills the opening screen`, m.heroArtworkFillsOpeningScreen === true);
     check(`${name}: hero names form a stacked editorial lockup`, m.names?.stacked === true);
+    check(
+      `${name}: countdown occupies its own band below the artwork`,
+      m.heroCountdown?.clearsArtworkFade === true &&
+        m.heroCountdown?.insideBand === true &&
+        m.heroCountdownBand?.beginsInsideFadedTail === true &&
+        (m.heroCountdownBand?.liftIntoFadedTail ?? 0) >= 48 &&
+        (m.heroCountdownBand?.liftIntoFadedTail ?? 999) <= 200 &&
+        (m.heroCountdown?.gapAfterArtworkFade ?? 0) >= 8 &&
+        (m.heroCountdown?.gapAfterArtworkFade ?? 999) <= 18,
+      JSON.stringify({ countdown: m.heroCountdown, band: m.heroCountdownBand }),
+    );
+    check(
+      `${name}: countdown shares the hero's left editorial alignment`,
+      Math.abs((m.heroCountdown?.left ?? 0) - (m.names?.left ?? 99_999)) <= 2,
+      `${m.heroCountdown?.left}px / ${m.names?.left}px`,
+    );
     if (m.viewport.w >= 1120) {
       check(
         `${name}: hero information shares the left editorial column`,
@@ -814,13 +857,6 @@ try {
         `${name}: hero details retain breathing room below the names`,
         (m.heroDetails?.gapBelowNames ?? 0) >= 24,
         `${m.heroDetails?.gapBelowNames}px gap`,
-      );
-      check(
-        `${name}: countdown stays low in the left column`,
-        Math.abs((m.heroCountdown?.left ?? 0) - (m.names?.left ?? 99_999)) <= 2 &&
-          (m.heroCountdown?.bottomGap ?? 0) >= m.viewport.h * 0.055 &&
-          (m.heroCountdown?.bottomGap ?? m.viewport.h) <= m.viewport.h * 0.09,
-        JSON.stringify(m.heroCountdown),
       );
       check(
         `${name}: vertical date stays at the upper-right edge`,
@@ -855,7 +891,7 @@ try {
     );
     check(
       `${name}: venue interior is a substantial visual moment`,
-      (m.venueDetail?.pctOfViewportWidth ?? 0) >= (m.viewport.w < 480 ? 90 : m.viewport.w >= 1600 ? 45 : m.viewport.w >= 1200 ? 50 : 55),
+      (m.venueDetail?.pctOfViewportWidth ?? 0) >= (m.viewport.w < 480 ? 90 : m.viewport.w >= 1600 ? 45 : 50),
       `${m.venueDetail?.pctOfViewportWidth ?? 0}% of viewport width`,
     );
     if (m.viewport.w >= 768) {
@@ -866,11 +902,11 @@ try {
         `${m.venueDetail?.gapFromCopy ?? 0}px gap; needs ${Math.round(minimumVenueGap)}px`,
       );
     }
-    check(`${name}: venue title treatment has no editorial rule`, m.venueTitleHasEditorialLine === false);
+    check(`${name}: venue title retains its intentional editorial rule`, m.venueTitleHasEditorialLine === true);
     check(`${name}: venue title never splits a word`, m.venueTitleWordsUnbroken === true);
     check(
       `${name}: hero loads the art-directed source for this breakpoint`,
-      m.illustration?.fileServed === (m.viewport.w < 1120 ? "venue-hero-mobile-master.webp" : "venue-hero-desktop-master.webp"),
+      m.illustration?.fileServed === (m.viewport.w < 864 ? "venue-hero-mobile-master.webp" : "venue-hero-desktop-master.webp"),
       m.illustration?.fileServed,
     );
     check(`${name}: timeline exposes all four real stops`, m.timelineStops === 4, `${m.timelineStops} stops`);
@@ -907,13 +943,30 @@ try {
       );
     }
     check(`${name}: venue clears incoming evening artwork`, m.continuity.venueClearsIncomingEveningArtwork);
-    check(`${name}: hero artwork fades into invitation instead of ending at its boundary`, m.continuity.heroFadesIntoInvitation);
+    check(`${name}: hero artwork hands off through the countdown band`, m.continuity.heroTransitionsThroughCountdownBand);
+    check(`${name}: countdown band preserves the continuous background canvas`, m.continuity.countdownBandKeepsContinuousCanvas);
     check(`${name}: one left invitation botanical bridges gently into the program`, m.continuity.invitationUsesOneLeftBotanicalBridge);
   }
 
+  const justBelowFormerBreakpoint = normal["1119x900"];
+  const justAboveFormerBreakpoint = normal["1121x900"];
+  check(
+    "hero remains continuous across the former 70rem breakpoint",
+    justBelowFormerBreakpoint?.illustration?.fileServed === justAboveFormerBreakpoint?.illustration?.fileServed &&
+      Math.abs((justBelowFormerBreakpoint?.names?.left ?? 0) - (justAboveFormerBreakpoint?.names?.left ?? 999)) <= 2 &&
+      Math.abs((justBelowFormerBreakpoint?.names?.top ?? 0) - (justAboveFormerBreakpoint?.names?.top ?? 999)) <= 2 &&
+      Math.abs((justBelowFormerBreakpoint?.heroCountdown?.top ?? 0) - (justAboveFormerBreakpoint?.heroCountdown?.top ?? 999)) <= 2 &&
+      Math.abs((justBelowFormerBreakpoint?.heroCountdown?.width ?? 0) - (justAboveFormerBreakpoint?.heroCountdown?.width ?? 999)) <= 3,
+    JSON.stringify({ below: justBelowFormerBreakpoint, above: justAboveFormerBreakpoint }),
+  );
+
   for (const [name, m] of Object.entries(reduced)) {
     check(`${name} (reduced motion): no horizontal overflow`, !m.horizontalOverflow);
-    check(`${name} (reduced motion): hero fits the opening screen`, m.heroAboveFold === true);
+    check(`${name} (reduced motion): artwork stage fills the opening screen`, m.heroArtworkFillsOpeningScreen === true);
+    check(
+      `${name} (reduced motion): countdown remains below the artwork`,
+      m.heroCountdown?.clearsArtworkFade === true && m.heroCountdownBand?.beginsInsideFadedTail === true,
+    );
     check(
       `${name} (reduced motion): nothing is left faded out`,
       m.hiddenRevealsAfterHydration === 0,

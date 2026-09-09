@@ -420,13 +420,15 @@
      The hero is one layered composition, not a picture placed next to copy. */
 
   .hero-artwork {
-    /* The artwork is allowed to finish its fade in the invitation instead of
-       being clipped at the viewport-sized hero boundary. */
+    --hero-stage-height: 100svh;
     --hero-bleed: clamp(10rem, 16vw, 18rem);
+    --hero-art-fade: clamp(2.5rem, 5svh, 3rem);
+    --hero-countdown-lift: clamp(6.5rem, calc(13.75rem - 8vw), 12rem);
+    --hero-content-left: clamp(1.25rem, calc(14.6vw - 2.3rem), 14rem);
+    --hero-content-right: clamp(1.25rem, calc(14.6vw - 2.3rem), 14rem);
     position: relative;
     isolation: isolate;
-    min-height: 100vh;
-    min-height: 100svh;
+    min-height: 0;
     overflow: visible;
     background: transparent;
     color: var(--color-charcoal);
@@ -463,17 +465,12 @@
     background:
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--color-paper) 80%, transparent) 0%,
-        color-mix(in srgb, var(--color-paper) 54%, transparent) 28%,
-        color-mix(in srgb, var(--color-paper) 18%, transparent) 42%,
-        transparent 56%
+        color-mix(in srgb, var(--color-paper) 34%, transparent) 0%,
+        color-mix(in srgb, var(--color-paper) 17%, transparent) 26%,
+        color-mix(in srgb, var(--color-paper) 5%, transparent) 42%,
+        transparent 54%
       ),
-      linear-gradient(
-        0deg,
-        color-mix(in srgb, var(--color-beige-deep) 76%, transparent) 0%,
-        color-mix(in srgb, var(--color-beige) 48%, transparent) 18%,
-        transparent 48%
-      );
+      linear-gradient(0deg, color-mix(in srgb, var(--color-beige-deep) 72%, transparent) 0%, transparent 48%);
   }
 
   .hero-venue-art {
@@ -481,24 +478,46 @@
     z-index: -3;
     inset: 0 0 auto;
     width: 100%;
-    height: calc(100% + var(--hero-bleed));
+    height: var(--hero-stage-height);
+    overflow: hidden;
     transform-origin: right 70%;
-    opacity: 0.94;
+    opacity: 0.92;
     pointer-events: none;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0 calc(100% - var(--hero-bleed)), transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0 calc(100% - var(--hero-bleed)), transparent 100%);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 0 calc(100% - var(--hero-countdown-lift) - var(--hero-art-fade)),
+      transparent calc(100% - var(--hero-countdown-lift))
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      #000 0 calc(100% - var(--hero-countdown-lift) - var(--hero-art-fade)),
+      transparent calc(100% - var(--hero-countdown-lift))
+    );
   }
 
-  .hero-venue-art picture,
   .hero-venue-art img {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    object-position:
+      clamp(50%, calc(44% + 1.67vw), 64%)
+      clamp(56%, calc(55.5% + 0.2vw), 58%);
+    transform-origin: 58% 50%;
+    transition:
+      opacity 700ms var(--ease-calm),
+      object-position 700ms var(--ease-calm),
+      transform 700ms var(--ease-calm);
   }
 
-  .hero-venue-art img {
-    object-fit: cover;
-    object-position: 64% 58%;
+  .hero-venue-image-desktop {
+    opacity: 1;
+  }
+
+  .hero-venue-image-mobile {
+    opacity: 0;
   }
 
   .hero-botanical {
@@ -516,34 +535,40 @@
   }
 
   .hero-botanical-left {
-    top: -16rem;
-    left: -7rem;
-    width: clamp(24rem, 38vw, 38rem);
-    opacity: 0.42;
+    top: clamp(-16rem, calc(-3.4rem - 10.5vw), -6rem);
+    left: clamp(-8rem, calc(-8.25rem + 1vw), -7rem);
+    width: clamp(26rem, 38vw, 38rem);
+    opacity: 0.4;
     transform: rotate(15deg);
   }
 
-  .hero-botanical-right {
-    right: -10rem;
-    /* Keep the hero decoration within the hero so it cannot become a second
-       invitation flower as the next section begins. */
-    bottom: 0;
-    width: clamp(23rem, 34vw, 34rem);
-    opacity: 0.25;
-    transform: rotate(-24deg) scaleX(-1);
+  .hero-countdown-botanical {
+    position: absolute;
+    z-index: 0;
+    top: auto;
+    bottom: clamp(-1rem, -0.5vw, -0.25rem);
+    right: clamp(-6rem, -5vw, -4rem);
+    width: clamp(11rem, 16vw, 15rem);
+    opacity: 0.38;
+    transform: rotate(24deg) scaleX(-1);
+    /* Keep the visible leaf detail inside the countdown band even though the
+       softly faded image box extends beyond it while the band lifts upward. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0 38%, #000 62%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0 38%, #000 62%, transparent 100%);
   }
 
   .hero-shell {
     position: relative;
     z-index: 2;
+    display: grid;
+    grid-template-rows: var(--hero-stage-height) auto;
     width: 100%;
-    min-height: 100vh;
-    min-height: 100svh;
+    min-height: 0;
   }
 
   .hero-topbar {
     position: absolute;
-    top: clamp(1.25rem, 3.8vh, 2.75rem);
+    top: clamp(0.75rem, calc(1vh + 1.5vw), 2.75rem);
     right: clamp(1.25rem, 3vw, 3.5rem);
     left: clamp(1.25rem, 3vw, 3.5rem);
     display: flex;
@@ -569,7 +594,7 @@
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: clamp(2rem, 5vw, 5.5rem);
+    gap: clamp(0.75rem, 5vw, 5.5rem);
     white-space: nowrap;
   }
 
@@ -580,7 +605,7 @@
     align-items: center;
     font-size: 0.58rem;
     font-weight: 500;
-    letter-spacing: 0.16em;
+    letter-spacing: clamp(0.1em, 0.5vw, 0.16em);
     text-transform: uppercase;
     color: color-mix(in srgb, var(--color-charcoal) 54%, transparent);
   }
@@ -607,9 +632,13 @@
   .hero-copy {
     position: absolute;
     isolation: isolate;
-    top: 24vh;
-    left: clamp(2rem, 12vw, 14rem);
-    width: min(35vw, 38rem);
+    top: clamp(7.25rem, calc(8vh + 10vw), 16rem);
+    left: var(--hero-content-left);
+    width: min(calc(100% - (2 * var(--hero-content-left))), clamp(22rem, 35vw, 38rem));
+    transition:
+      top 600ms var(--ease-calm),
+      left 600ms var(--ease-calm),
+      width 600ms var(--ease-calm);
   }
 
   .hero-copy::before {
@@ -642,9 +671,9 @@
   .hero-title {
     display: grid;
     justify-items: start;
-    margin-top: 0;
+    margin-top: clamp(0.35rem, calc(1rem - 0.5vw), 0.9rem);
     font-family: var(--font-names);
-    font-size: clamp(5.8rem, 8vw, 9.6rem);
+    font-size: clamp(4.1rem, 8vw, 9.6rem);
     font-weight: 400;
     line-height: 0.72;
     letter-spacing: -0.045em;
@@ -652,6 +681,7 @@
     text-transform: none;
     color: var(--color-charcoal);
     text-wrap: balance;
+    transition: font-size 600ms var(--ease-calm);
   }
 
   .hero-title span:last-child {
@@ -669,10 +699,10 @@
   }
 
   .hero-details {
-    width: min(100%, 34rem);
-    margin-top: clamp(2rem, 3vw, 3rem);
+    width: min(100%, clamp(18rem, 28vw, 34rem));
+    margin-top: clamp(1.4rem, 3vw, 3rem);
     font-family: var(--font-sans);
-    font-size: clamp(0.61rem, 0.66vw, 0.72rem);
+    font-size: clamp(0.56rem, 0.66vw, 0.72rem);
     font-weight: 500;
     line-height: 1.65;
     letter-spacing: 0.19em;
@@ -697,7 +727,7 @@
   }
 
   .hero-place {
-    margin-top: 0.75rem;
+    margin-top: clamp(0.55rem, calc(0.35rem + 0.5vw), 0.75rem);
   }
 
   .hero-place span:last-child {
@@ -705,16 +735,30 @@
   }
 
   .hero-countdown {
-    position: absolute;
+    position: relative;
     isolation: isolate;
     z-index: 3;
-    left: clamp(2rem, 12vw, 14rem);
-    bottom: 7vh;
-    width: min(38vw, 38rem);
+    width: min(calc(100% - var(--hero-content-left) - var(--hero-content-right)), 44rem);
+    margin-left: var(--hero-content-left);
+    transition:
+      width 600ms var(--ease-calm),
+      margin-left 600ms var(--ease-calm);
+  }
+
+  .hero-countdown-band {
+    position: relative;
+    isolation: isolate;
+    z-index: 4;
+    display: grid;
+    grid-row: 2;
+    gap: clamp(0.7rem, 1.5vw, 1rem);
+    margin-top: calc(-1 * var(--hero-countdown-lift));
+    padding: clamp(0.625rem, 1vw, 1rem) 0 clamp(2.75rem, 5vw, 4.5rem);
+    transition: margin-top 600ms var(--ease-calm);
   }
 
   .hero-countdown-overline {
-    margin-bottom: 0.65rem;
+    margin-bottom: clamp(0.45rem, 1vw, 0.65rem);
     font-size: 0.56rem;
     color: color-mix(in srgb, var(--color-charcoal) 65%, transparent);
   }
@@ -731,7 +775,7 @@
     position: relative;
     display: grid;
     gap: 0.25rem;
-    padding: 0.75rem clamp(0.45rem, 1vw, 0.85rem);
+    padding: 0.65rem clamp(0.35rem, 1vw, 0.85rem);
   }
 
   .countdown-unit + .countdown-unit::before {
@@ -746,13 +790,13 @@
 
   .countdown-value {
     font-family: var(--font-display);
-    font-size: clamp(1.45rem, 1.8vw, 2.15rem);
+    font-size: clamp(1.2rem, calc(0.85rem + 1.4vw), 2.15rem);
     font-variant-numeric: tabular-nums;
     line-height: 1;
   }
 
   .countdown-label {
-    font-size: clamp(0.42rem, 0.42vw, 0.5rem);
+    font-size: clamp(0.45rem, 0.42vw, 0.5rem);
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--color-charcoal) 57%, transparent);
@@ -782,14 +826,13 @@
   }
 
   .hero-scroll {
-    position: absolute;
-    left: clamp(2rem, 12vw, 14rem);
-    bottom: clamp(1.5rem, 3.5vh, 2.75rem);
+    position: relative;
+    margin-left: var(--hero-content-left);
   }
 
   .hero-scroll a {
     display: inline-flex;
-    min-height: 44px;
+    min-height: clamp(2rem, 3vw, 2.75rem);
     align-items: center;
     gap: 1rem;
     font-size: 0.61rem;
@@ -808,13 +851,13 @@
 
   .hero-vertical-date {
     position: absolute;
-    top: clamp(6.5rem, 12vh, 9rem);
+    top: clamp(4.25rem, calc(2.3rem + 5vw), 9rem);
     right: clamp(1.25rem, 2.5vw, 3rem);
     display: grid;
     justify-items: center;
-    gap: 1.5rem;
+    gap: clamp(0.65rem, 1.5vw, 1.5rem);
     font-family: var(--font-display);
-    font-size: clamp(0.72rem, 0.8vw, 0.9rem);
+    font-size: clamp(0.56rem, 0.8vw, 0.9rem);
     line-height: 1.35;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -831,7 +874,7 @@
     position: relative;
     display: block;
     width: 1px;
-    height: clamp(3rem, 7vh, 5rem);
+    height: clamp(2.25rem, 4vw, 5rem);
     background: color-mix(in srgb, var(--color-olive) 38%, transparent);
   }
 
@@ -847,85 +890,36 @@
     background: color-mix(in srgb, var(--color-olive) 58%, transparent);
   }
 
-  @media (max-width: 69.999rem) {
-    .hero-title {
-      font-size: clamp(4.8rem, 9.8vw, 7rem);
+  @media (max-width: 53.999rem) {
+    .hero-artwork {
+      --hero-art-fade: clamp(4.5rem, 10svh, 6rem);
     }
 
-    .hero-copy {
-      left: clamp(2rem, 8.5vw, 6rem);
-      width: min(46vw, 34rem);
+    .hero-venue-image-desktop {
+      opacity: 0;
     }
 
-    .hero-countdown {
-      left: clamp(2rem, 8.5vw, 6rem);
-      width: min(48vw, 34rem);
+    .hero-venue-image-mobile {
+      opacity: 1;
     }
-
-    .hero-venue-art { opacity: 0.93; }
   }
 
-  @media (max-width: 47.999rem) {
+  @media (max-width: 48rem) {
     .hero-artwork {
       --hero-bleed: clamp(8rem, 30vw, 13rem);
     }
 
-    .hero-light {
-      background:
-        /* On mobile the copy sits above the architecture, so a desktop-style
-           horizontal wash would bleach the artwork's left edge for no reason. */
-        linear-gradient(180deg, color-mix(in srgb, var(--color-paper) 82%, transparent) 0%, transparent 34%),
-        linear-gradient(0deg, color-mix(in srgb, var(--color-beige-deep) 72%, transparent) 0%, transparent 48%);
-    }
-
-    .hero-shell {
-      min-height: 100svh;
-    }
-
-    .hero-topbar {
-      top: 0.75rem;
-      gap: 0.75rem;
+    .hero-venue-image-mobile {
+      transform: translate(1vw, 8svh) scale(1.05);
     }
 
     .hero-monogram a {
       font-size: 1rem;
     }
 
-    .hero-nav {
-      position: static;
-      transform: none;
-      gap: clamp(0.65rem, 2.8vw, 1rem);
-    }
-
     .hero-nav a {
       min-height: 40px;
       font-size: 0.58rem;
-      letter-spacing: 0.1em;
-    }
-
-    .hero-copy {
-      top: clamp(7.25rem, 17vh, 9rem);
-      left: var(--spacing-gutter);
-      width: calc(100% - (2 * var(--spacing-gutter)));
-    }
-
-    .hero-copy::before {
-      inset: -1.25rem -1.75rem -1.5rem;
-      background: radial-gradient(
-        ellipse at 28% 42%,
-        color-mix(in srgb, var(--color-beige) 22%, transparent) 0%,
-        transparent 72%
-      );
-    }
-
-    .hero-overline {
-      font-size: 0.61rem;
-    }
-
-    .hero-title {
-      margin-top: 0.9rem;
-      font-size: clamp(3.7rem, 17vw, 5.3rem);
-      line-height: 0.72;
     }
 
     .hero-title i {
@@ -939,88 +933,94 @@
     }
 
     .hero-details {
-      width: min(100%, 18rem);
-      margin-top: 1.4rem;
-      font-size: 0.56rem;
       letter-spacing: 0.14em;
     }
 
-    .hero-place {
-      margin-top: 0.55rem;
-    }
-
-    .hero-venue-art {
-      inset: 0 0 auto;
-      width: 100%;
-      opacity: 0.9;
-    }
-
-    .hero-venue-art img {
-      object-position: 50% 56%;
-    }
-
-    .hero-botanical-left {
-      top: -6rem;
-      left: -8rem;
-      width: 26rem;
-      opacity: 0.4;
-    }
-
-    .hero-botanical-right {
-      right: -12rem;
-      bottom: 0;
-      width: 24rem;
-      opacity: 0.2;
-    }
-
-    .hero-countdown {
-      left: var(--spacing-gutter);
-      bottom: max(2.75rem, env(safe-area-inset-bottom) + 1.5rem);
-      width: calc(100% - (2 * var(--spacing-gutter)));
-    }
-
     .hero-countdown-overline {
-      margin-bottom: 0.45rem;
       font-size: 0.55rem;
       color: color-mix(in srgb, var(--color-charcoal) 82%, transparent);
     }
 
-    .countdown-unit {
-      padding: 0.65rem 0.35rem;
-    }
-
-    .countdown-value {
-      font-size: clamp(1.15rem, 5vw, 1.5rem);
-    }
-
     .countdown-label {
-      font-size: 0.48rem;
       letter-spacing: 0.1em;
     }
 
     .hero-scroll {
-      right: auto;
-      left: var(--spacing-gutter);
-      bottom: max(0.75rem, env(safe-area-inset-bottom));
       transform: none;
     }
 
-    .hero-scroll a {
-      min-height: 32px;
-    }
-
     .hero-vertical-date {
-      top: 4.25rem;
       right: var(--spacing-gutter);
-      display: grid;
-      gap: 0.65rem;
-      font-size: 0.56rem;
       letter-spacing: 0.1em;
       color: color-mix(in srgb, var(--color-charcoal) 68%, transparent);
     }
+  }
 
-    .hero-vertical-date-line {
-      height: 2.25rem;
+  @media (max-width: 40rem) {
+    .hero-venue-image-mobile {
+      transform: translate(2vw, 8svh) scale(1.15);
+    }
+  }
+
+  @media (max-width: 32rem) {
+    .hero-venue-image-mobile {
+      transform: translate(3vw, 8svh) scale(1.23);
+    }
+  }
+
+  @media (max-width: 27rem) {
+    .hero-venue-art {
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 36svh,
+        #000 43svh,
+        #000 calc(100% - var(--hero-countdown-lift) - var(--hero-art-fade)),
+        transparent calc(100% - var(--hero-countdown-lift))
+      );
+      mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 36svh,
+        #000 43svh,
+        #000 calc(100% - var(--hero-countdown-lift) - var(--hero-art-fade)),
+        transparent calc(100% - var(--hero-countdown-lift))
+      );
+    }
+
+    .hero-venue-image-mobile {
+      transform: translate(4vw, 8svh) scale(1.3);
+    }
+  }
+
+  @media (max-width: 27rem) and (max-height: 40rem) {
+    .hero-artwork {
+      --hero-stage-height: max(100svh, 42rem);
+      --hero-art-fade: 5rem;
+      --hero-countdown-lift: 8rem;
+    }
+
+    .hero-venue-art {
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 45svh,
+        #000 54svh,
+        #000 calc(100% - var(--hero-countdown-lift) - var(--hero-art-fade)),
+        transparent calc(100% - var(--hero-countdown-lift))
+      );
+      mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 45svh,
+        #000 54svh,
+        #000 calc(100% - var(--hero-countdown-lift) - var(--hero-art-fade)),
+        transparent calc(100% - var(--hero-countdown-lift))
+      );
+    }
+
+    .hero-venue-image-mobile {
+      transform: translate(3vw, 20svh) scale(1.12);
     }
   }
 
@@ -1353,6 +1353,83 @@
     font-size: var(--text-fine);
     font-weight: 500;
     letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .venue-map-chooser {
+    width: min(calc(100% - 2rem), 28rem);
+    max-width: none;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-charcoal);
+  }
+
+  .venue-map-chooser::backdrop {
+    background: color-mix(in srgb, var(--color-charcoal) 58%, transparent);
+    backdrop-filter: blur(4px);
+  }
+
+  .venue-map-chooser-panel {
+    position: relative;
+    padding: 2.25rem 1.5rem 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--color-olive) 22%, transparent);
+    background: var(--color-paper);
+    box-shadow: 0 1.5rem 5rem color-mix(in srgb, var(--color-charcoal) 28%, transparent);
+  }
+
+  .venue-map-chooser-close {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.75rem;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--color-charcoal) 68%, transparent);
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .venue-map-chooser-kicker {
+    margin: 0 0 0.65rem;
+    color: var(--color-olive);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .venue-map-chooser h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 8vw, 2.65rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+
+  .venue-map-apps {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+
+  .venue-map-apps a {
+    display: flex;
+    min-height: 3.25rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-olive) 32%, transparent);
+    background: color-mix(in srgb, var(--color-beige) 58%, var(--color-paper));
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 

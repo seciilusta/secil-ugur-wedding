@@ -12,28 +12,33 @@ export function Hero() {
       <div aria-hidden className="hero-light" />
 
       <EntranceMotion entrance="soft-scale" trigger="mount" delay={0.05} className="hero-venue-art">
-        <picture>
-          <source media="(max-width: 69.999rem)" srcSet={artwork.heroMobile.src} />
-          <img
-            src={artwork.heroDesktop.src}
-            width={artwork.heroDesktop.width}
-            height={artwork.heroDesktop.height}
-            alt=""
-            fetchPriority="high"
-            decoding="async"
-          />
-        </picture>
+        {/* Keep both art-directed crops mounted so crossing a responsive
+            boundary can cross-fade instead of replacing the image in one frame. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="hero-venue-image hero-venue-image-desktop"
+          src={artwork.heroDesktop.src}
+          width={artwork.heroDesktop.width}
+          height={artwork.heroDesktop.height}
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="hero-venue-image hero-venue-image-mobile"
+          src={artwork.heroMobile.src}
+          width={artwork.heroMobile.width}
+          height={artwork.heroMobile.height}
+          alt=""
+          decoding="async"
+        />
       </EntranceMotion>
 
       <BotanicalDrift className="hero-botanical hero-botanical-left" direction={-1}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={artwork.botanical} alt={artwork.botanicalAlt} width="900" height="1350" decoding="async" />
       </BotanicalDrift>
-      <BotanicalDrift className="hero-botanical hero-botanical-right" direction={1}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={artwork.botanical} alt={artwork.botanicalAlt} width="900" height="1350" decoding="async" />
-      </BotanicalDrift>
-
       <div className="hero-shell">
         <header className="hero-topbar">
           <EntranceMotion entrance="from-left" trigger="mount" className="hero-monogram">
@@ -77,11 +82,6 @@ export function Hero() {
           </EntranceMotion>
         </div>
 
-        <EntranceMotion entrance="quiet" trigger="mount" delay={0.52} className="hero-countdown">
-          <p className="hero-countdown-overline">{hero.countdown.overline}</p>
-          <Countdown />
-        </EntranceMotion>
-
         <EntranceMotion entrance="quiet" trigger="mount" delay={0.58} className="hero-vertical-date">
           <time aria-hidden="true" dateTime={event.isoDate}>
             <span>{eventDay.padStart(2, "0")}</span>
@@ -91,12 +91,24 @@ export function Hero() {
           <span aria-hidden="true" className="hero-vertical-date-line" />
         </EntranceMotion>
 
-        <EntranceMotion entrance="quiet" trigger="mount" delay={0.7} className="hero-scroll">
-          <a href="#davet">
-            <span>{hero.scrollHint}</span>
-            <span aria-hidden className="hero-scroll-line" />
-          </a>
-        </EntranceMotion>
+        <div className="hero-countdown-band">
+          <BotanicalDrift className="hero-countdown-botanical" direction={1}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={artwork.botanical} alt={artwork.botanicalAlt} width="900" height="1350" decoding="async" />
+          </BotanicalDrift>
+
+          <EntranceMotion entrance="quiet" trigger="mount" delay={0.52} className="hero-countdown">
+            <p className="hero-countdown-overline">{hero.countdown.overline}</p>
+            <Countdown />
+          </EntranceMotion>
+
+          <EntranceMotion entrance="quiet" trigger="mount" delay={0.7} className="hero-scroll">
+            <a href="#davet">
+              <span>{hero.scrollHint}</span>
+              <span aria-hidden className="hero-scroll-line" />
+            </a>
+          </EntranceMotion>
+        </div>
       </div>
     </section>
   );

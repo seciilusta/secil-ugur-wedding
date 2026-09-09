@@ -20,8 +20,8 @@ export function VenueMap() {
           {hasDirections ? (
             <VenueDirections
               href={maps.directionsUrl}
-              mobileHref={maps.mobileDirectionsUrl}
               label={venueSection.directionsLabel}
+              appLinks={maps.appDirections}
             />
           ) : null}
         </EntranceMotion>
