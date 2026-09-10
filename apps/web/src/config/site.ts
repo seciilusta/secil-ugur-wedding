@@ -216,12 +216,14 @@ export const site = {
    */
 
   maps: {
-    embedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.144942140483!2d28.982248375473733!3d41.01591617414719!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab97532631e4f%3A0x64b024205723270d!2sAden%20Bo%C4%9Fazk%C3%B6y%20Tesisleri!5e0!3m2!1str!2str!4v1720071162130!5m2!1str!2str",
-    directionsUrl: "https://www.google.com/maps?saddr=My+Location&daddr=Aden+Boğazköy+Tesisleri,+Boğazköy+İstiklal,+Arnavutköy+Habibler+Yolu+No:1266,+34275+Arnavutköy%2Fİstanbul/",
+    // Aden Boğazköy Tesisleri: 41.161347, 28.775932.
+    // Keep every map provider pointed at the same verified venue coordinate.
+    embedUrl: "https://www.google.com/maps?q=41.161347,28.775932&z=16&output=embed",
+    directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=41.161347,28.775932",
     appDirections: {
-      appleMaps: "https://maps.apple.com/?daddr=41.01591617414719,28.982248375473733&dirflg=d",
-      googleMaps: "https://www.google.com/maps/dir/?api=1&destination=41.01591617414719,28.982248375473733",
-      waze: "https://www.waze.com/ul?ll=41.01591617414719%2C28.982248375473733&navigate=yes",
+      appleMaps: "https://maps.apple.com/?daddr=41.161347,28.775932&dirflg=d",
+      googleMaps: "https://www.google.com/maps/dir/?api=1&destination=41.161347,28.775932",
+      waze: "https://www.waze.com/ul?ll=41.161347%2C28.775932&navigate=yes",
     },
   },
 
