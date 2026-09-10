@@ -701,7 +701,7 @@ const CONTRAST_PROBE = `(() => {
   const styles = getComputedStyle(document.documentElement);
   const bands = {
     olive: parse(styles.getPropertyValue('--color-olive')),
-    deepEspresso: parse(styles.getPropertyValue('--color-deep-espresso')),
+    deepMocha: parse(styles.getPropertyValue('--color-deep-mocha')),
     softBlack: parse(styles.getPropertyValue('--color-soft-black')),
   };
 
@@ -712,8 +712,8 @@ const CONTRAST_PROBE = `(() => {
     ['Field hint', '#katilim .field-hint', 'olive'],
     ['Choice label', '#katilim label.choice', 'olive'],
     ['Privacy note', '#katilim form > p:last-of-type', 'olive'],
-    ['Footer closing / espresso', 'footer .footer-closing', 'deepEspresso'],
-    ['Footer date / espresso', 'footer time', 'deepEspresso'],
+    ['Footer closing / deep mocha', 'footer .footer-closing', 'deepMocha'],
+    ['Footer date / deep mocha', 'footer time', 'deepMocha'],
     ['Footer closing / night', 'footer .footer-closing', 'softBlack'],
     ['Footer date / night', 'footer time', 'softBlack'],
   ];

@@ -33,7 +33,7 @@
   --color-beige-deep: #ded2c4; /* lower half of the beige stretch          */
   --color-olive-mist: #aaa998; /* readable desaturated threshold before olive */
   --color-olive-deep: #414a3a; /* bottom of the RSVP section               */
-  --color-deep-espresso: #4e4036; /* warm threshold before the dark close  */
+  --color-deep-mocha: #3a342e; /* smoky brown bridge, without a red cast    */
   --color-date-accent: #6f563e; /* warm dark accent, readable on deep beige */
   --color-light-line: #846b4d; /* warm structural line on paper and ivory  */
   --color-hero-line: #80786d; /* quiet but visible over the opening paper  */
@@ -1092,7 +1092,13 @@
     isolation: isolate;
     overflow: visible;
     padding-block: clamp(5rem, 7vw, 7rem) clamp(5.5rem, 7vw, 7rem);
-    background: linear-gradient(180deg, var(--color-beige-deep) 0%, color-mix(in srgb, var(--color-beige-deep) 54%, var(--color-olive-mist)) 72%, var(--color-olive-mist) 100%);
+    background: linear-gradient(
+      180deg,
+      var(--color-beige-deep) 0%,
+      color-mix(in srgb, var(--color-beige-deep) 72%, var(--color-olive-mist)) 35%,
+      color-mix(in srgb, var(--color-beige-deep) 36%, var(--color-olive-mist)) 65%,
+      var(--color-olive-mist) 100%
+    );
   }
 
   /* Program lines carry the warm date accent, maintaining definition over
@@ -1193,16 +1199,28 @@
     align-items: start;
   }
 
-  .timeline-dot {
+  .timeline-icon {
+    --timeline-icon-size: clamp(2.75rem, 4vw, 3.25rem);
     position: absolute;
-    top: 0.68rem;
-    left: calc(clamp(3.5rem, 7vw, 6.5rem) * -1 - 0.4rem + 1.1rem);
-    width: 0.78rem;
-    height: 0.78rem;
+    z-index: 1;
+    top: calc(1.07rem - var(--timeline-icon-size) / 2);
+    left: calc(clamp(3.5rem, 7vw, 6.5rem) * -1 - var(--timeline-icon-size) / 2 + 1.1rem);
+    display: grid;
+    width: var(--timeline-icon-size);
+    height: var(--timeline-icon-size);
+    place-items: center;
+    padding: 0.47rem;
     border: 1px solid var(--color-date-accent);
     border-radius: 50%;
     background: var(--color-beige);
     box-shadow: 0 0 0 0.42rem color-mix(in srgb, var(--color-beige) 82%, transparent);
+    color: var(--color-date-accent);
+  }
+
+  .timeline-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .timeline-time {
@@ -1433,7 +1451,7 @@
     overflow: visible;
     z-index: auto;
     padding: clamp(7rem, 11vw, 10rem) 0 clamp(7rem, 11vw, 10rem);
-    background: linear-gradient(180deg, var(--color-olive) 0%, var(--color-olive-deep) 55%, var(--color-deep-espresso) 100%);
+    background: linear-gradient(180deg, var(--color-olive) 0%, var(--color-olive-deep) 55%, var(--color-deep-mocha) 100%);
   }
 
   .rsvp-grid {
@@ -1510,7 +1528,7 @@
     position: relative;
     z-index: auto;
     padding-block: clamp(4rem, 7vw, 6rem);
-    background: linear-gradient(180deg, var(--color-deep-espresso) 0%, color-mix(in srgb, var(--color-deep-espresso) 56%, var(--color-soft-black)) 58%, var(--color-soft-black) 100%);
+    background: linear-gradient(180deg, var(--color-deep-mocha) 0%, color-mix(in srgb, var(--color-deep-mocha) 56%, var(--color-soft-black)) 58%, var(--color-soft-black) 100%);
     color: var(--color-on-dark-muted);
   }
 
@@ -1650,8 +1668,8 @@
       gap: 1rem;
     }
 
-    .timeline-dot {
-      left: -2.53rem;
+    .timeline-icon {
+      left: calc(-3.25rem - var(--timeline-icon-size) / 2 + 1.1rem);
     }
 
     .venue-composition {

@@ -1,0 +1,32 @@
+---
+description: Product, visual-continuity, motion, and validation constraints for the wedding invitation
+alwaysApply: true
+---
+
+# Wedding Experience
+
+## Product invariants
+
+- Build one premium, editorial, single-page invitation for **Seçil & Uğur**: Hero → Davet → Düğün Günü → Mekân → RSVP → Footer. It must feel like one illustrated invitation, never a SaaS page, card collection, or generic template.
+- Preserve semantic sections, anchors, RSVP API/schema/storage behavior, and approved artwork unless a request explicitly changes them. Do not add story, gallery, wedding-party, or ceremony/reception sections.
+- Keep wedding facts deliberate: 4 Ekim 2026 Pazar; Aden Boğazköy Tesisleri Camlı Köşk · Arnavutköy. The countdown uses `Europe/Istanbul`, target `2026-10-04T18:30:00+03:00`, tabular digits, and these states: countdown before 18:30; “Bugün bizim günümüz” until midnight; then the thank-you message.
+- The schedule is exactly: 19:00 Karşılama, 19:30 Nikâh, 20:00 İkram, 21:00 Eğlence. Do not change copy, date, or schedule incidentally.
+
+## Art direction and continuity
+
+- Progress steadily from bright paper through ivory, beige and olives to dark brown/night. Avoid early black, copper/red casts, saturated accents, random bright patches, and any late-page brightening.
+- Color interpolation belongs behind artwork and content. Section DOM boundaries must not create bands, seams, opaque overpainting, bridge strips, clipped art, z-index pops, or rectangular visual edges.
+- Preserve botanical/watercolor ownership and permit intentional adjacent-section overflow. Use transparent wrappers, stacking discipline, and soft masks/fades; never cover content or focusable controls. Layering is canvas < artwork < content.
+- Favor expressive typography, controlled asymmetry, purposeful whitespace, and readable Turkish line breaks. Do not make every section viewport-height or add empty spacer screens.
+- Check contrast for every text, rule, button, and form state against its actual canvas. Do not use ad-hoc component colors; extend established CSS tokens.
+
+## Motion, responsive behavior, and accessibility
+
+- Keep existing scroll choreography unless fixing a diagnosed defect. Prefer transform, opacity, scale, restrained parallax, and justified masks; avoid generic fade-up, bounce, overshoot, large rotations/travel, and costly scroll repainting.
+- With `prefers-reduced-motion`, remove decorative/parallax choreography, expose all content and milestones immediately, and render the timeline complete. JavaScript failure must not hide content.
+- Treat mobile as independent art direction: validate 390×844 and 430×932 plus 768×1024 and 1440×900. Recompose crops, spacing, timeline, CTA, and artwork rather than mechanically scaling desktop.
+
+## Delivery checks
+
+- For visual work, inspect the real browser at mid-transition states: Hero→Davet, Davet→Düğün Günü, Düğün Günü→Mekân, Mekân→RSVP, RSVP→Footer. Check seams, clipping, overflow, layering, contrast, and blank gaps.
+- Run the relevant lint, typecheck, tests, production build, and `node tools/verify.mjs`. Test exact countdown boundaries when touching time logic; preserve RSVP flows and API tests.

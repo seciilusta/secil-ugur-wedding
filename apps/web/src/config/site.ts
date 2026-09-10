@@ -40,7 +40,7 @@ export const site = {
     countdownTarget: "2026-10-04T18:30:00+03:00",
     celebrationEnd: "2026-10-05T00:00:00+03:00",
     schedule: [
-      { time: "18.30", label: "Karşılama", detail: "Bahçede ilk buluşma" },
+      { time: "19.00", label: "Karşılama", detail: "Bahçede ilk buluşma" },
       { time: "19.30", label: "Nikâh", detail: "Birlikte söyleyeceğimiz evet" },
       { time: "20.00", label: "İkram", detail: "Sofrada paylaşacağımız tatlar" },
       { time: "21.00", label: "Eğlence", detail: "Müzik, dans ve kutlama" },
