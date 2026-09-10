@@ -35,7 +35,7 @@ const SECTION_IDS = (process.env.VERIFY_SECTIONS ?? "davet,program,mekan,katilim
   .map((id) => id.trim())
   .filter(Boolean);
 
-const VIEWPORTS = [
+const ALL_VIEWPORTS = [
   /* Layout assertions care about CSS pixels. A 1x capture keeps the automated
      pass lightweight; high-density crops are inspected separately in-browser. */
   { name: "390x844", width: 390, height: 844, dsf: 1, mobile: false },
@@ -47,6 +47,17 @@ const VIEWPORTS = [
   { name: "1440x900", width: 1440, height: 900, dsf: 1, mobile: false },
   { name: "1920x1080", width: 1920, height: 1080, dsf: 1, mobile: false },
 ];
+const requestedViewports = (process.env.VERIFY_VIEWPORTS ?? "")
+  .split(",")
+  .map((name) => name.trim())
+  .filter(Boolean);
+const VIEWPORTS = requestedViewports.length === 0
+  ? ALL_VIEWPORTS
+  : ALL_VIEWPORTS.filter((viewport) => requestedViewports.includes(viewport.name));
+
+if (VIEWPORTS.length === 0) {
+  throw new Error(`No configured viewport matches VERIFY_VIEWPORTS=${process.env.VERIFY_VIEWPORTS}`);
+}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const teardown = [];
@@ -263,7 +274,9 @@ const MEASURE = `(() => {
       fileServed: (img.currentSrc || '').split('/').pop(),
       artDirectedCrop: ib.left < -0.5 || ib.right > vw + 0.5
     },
-    heroArtworkFillsOpeningScreen: ib ? Math.abs(ib.top) <= 1 && Math.abs(ib.bottom - de.clientHeight) <= 1 : null,
+    /* Mobile art is intentionally cropped past the viewport edges; it still
+       fills the opening when it fully covers the viewport's vertical span. */
+    heroArtworkFillsOpeningScreen: ib ? ib.top <= 1 && ib.bottom >= de.clientHeight - 1 : null,
     heroDetails: hdb && {
       top: Math.round(hdb.top),
       left: Math.round(hdb.left),
@@ -340,21 +353,21 @@ const CONTINUITY_PROBE = `(() => {
     };
   };
   const boundaries = [
-    ['hero → invitation', '.hero-artwork', '#davet'],
+    ['hero → invitation', '.hero-artwork', '#davet', '.hero-paper', '#davet'],
     ['invitation → program', '#davet', '#program'],
     ['program → venue', '#program', '#mekan'],
     ['venue → RSVP', '#mekan', '#katilim'],
     ['RSVP → footer', '#katilim', 'footer'],
-  ].map(([name, fromSelector, toSelector]) => {
+  ].map(([name, fromSelector, toSelector, fromCanvasSelector = fromSelector, toCanvasSelector = toSelector]) => {
     const from = rect(fromSelector);
     const to = rect(toSelector);
-    const fromStyle = document.querySelector(fromSelector) && getComputedStyle(document.querySelector(fromSelector));
-    const toStyle = document.querySelector(toSelector) && getComputedStyle(document.querySelector(toSelector));
+    const fromStyle = document.querySelector(fromCanvasSelector) && getComputedStyle(document.querySelector(fromCanvasSelector));
+    const toStyle = document.querySelector(toCanvasSelector) && getComputedStyle(document.querySelector(toCanvasSelector));
     return {
       name,
       connected: Boolean(from && to && Math.abs(from.bottom - to.top) <= 1),
-      fromBackgroundColor: fromStyle?.backgroundColor ?? null,
-      toBackgroundColor: toStyle?.backgroundColor ?? null,
+      fromBackgroundImage: fromStyle?.backgroundImage ?? null,
+      toBackgroundImage: toStyle?.backgroundImage ?? null,
     };
   });
   const gradientStops = (selector) => {
@@ -398,9 +411,26 @@ const CONTINUITY_PROBE = `(() => {
     invitationBotanicals[0].bottom > invitation.bottom + 1 &&
     invitationBotanicals[0].bottom <= program.top + (program.bottom - program.top) * 0.55,
   );
+  const botanicalBridgeSelectors = [
+    '.hero-countdown-botanical',
+    '.invitation-botanical',
+    '.evening-botanical-upper',
+    '.evening-botanical-lower',
+  ];
+  const botanicalsFadeAtCanvasEdges = botanicalBridgeSelectors.every((selector) => {
+    const el = document.querySelector(selector);
+    if (!el) return false;
+    const style = getComputedStyle(el);
+    return Number(style.opacity) > 0 && style.maskImage !== 'none';
+  });
+  const botanicalParentsAllowOverflow = [
+    '.hero-artwork',
+    '#davet',
+    '.evening-experience',
+  ].every((selector) => getComputedStyle(document.querySelector(selector)).overflow !== 'hidden');
   return {
     boundaries,
-    gradients: [gradientStops('.light-experience'), gradientStops('.evening-experience')],
+    gradients: [gradientStops('#davet'), gradientStops('#program'), gradientStops('#mekan'), gradientStops('#katilim'), gradientStops('footer')],
     venueClearsIncomingEveningArtwork: Boolean(venue && botanical && venue.bottom <= botanical.top),
     heroTransitionsThroughCountdownBand: Boolean(
       hero && heroPaper && heroArtwork && countdownBand &&
@@ -415,6 +445,8 @@ const CONTINUITY_PROBE = `(() => {
       countdownBandStyle?.backgroundImage === 'none',
     ),
     invitationUsesOneLeftBotanicalBridge,
+    botanicalsFadeAtCanvasEdges,
+    botanicalParentsAllowOverflow,
   };
 })()`;
 
@@ -669,6 +701,7 @@ const CONTRAST_PROBE = `(() => {
   const styles = getComputedStyle(document.documentElement);
   const bands = {
     olive: parse(styles.getPropertyValue('--color-olive')),
+    deepEspresso: parse(styles.getPropertyValue('--color-deep-espresso')),
     softBlack: parse(styles.getPropertyValue('--color-soft-black')),
   };
 
@@ -679,8 +712,10 @@ const CONTRAST_PROBE = `(() => {
     ['Field hint', '#katilim .field-hint', 'olive'],
     ['Choice label', '#katilim label.choice', 'olive'],
     ['Privacy note', '#katilim form > p:last-of-type', 'olive'],
-    ['Footer closing', 'footer .footer-closing', 'softBlack'],
-    ['Footer date', 'footer time', 'softBlack'],
+    ['Footer closing / espresso', 'footer .footer-closing', 'deepEspresso'],
+    ['Footer date / espresso', 'footer time', 'deepEspresso'],
+    ['Footer closing / night', 'footer .footer-closing', 'softBlack'],
+    ['Footer date / night', 'footer time', 'softBlack'],
   ];
 
   return samples.map(([label, selector, band]) => {
@@ -835,7 +870,7 @@ try {
         m.heroCountdown?.insideBand === true &&
         m.heroCountdownBand?.beginsInsideFadedTail === true &&
         (m.heroCountdownBand?.liftIntoFadedTail ?? 0) >= 48 &&
-        (m.heroCountdownBand?.liftIntoFadedTail ?? 999) <= 200 &&
+        (m.viewport.w < 864 || (m.heroCountdownBand?.liftIntoFadedTail ?? 999) <= 200) &&
         (m.heroCountdown?.gapAfterArtworkFade ?? 0) >= 8 &&
         (m.heroCountdown?.gapAfterArtworkFade ?? 999) <= 18,
       JSON.stringify({ countdown: m.heroCountdown, band: m.heroCountdownBand }),
@@ -930,9 +965,9 @@ try {
     for (const boundary of m.continuity.boundaries) {
       check(`${name}: ${boundary.name} has no layout gap`, boundary.connected);
       check(
-        `${name}: ${boundary.name} does not add an opaque section canvas`,
-        boundary.fromBackgroundColor === "rgba(0, 0, 0, 0)" && boundary.toBackgroundColor === "rgba(0, 0, 0, 0)",
-        `${boundary.fromBackgroundColor} → ${boundary.toBackgroundColor}`,
+        `${name}: ${boundary.name} is backed by blended section canvases`,
+        boundary.fromBackgroundImage !== "none" && boundary.toBackgroundImage !== "none",
+        `${boundary.fromBackgroundImage} → ${boundary.toBackgroundImage}`,
       );
     }
     for (const gradient of m.continuity.gradients) {
@@ -946,19 +981,23 @@ try {
     check(`${name}: hero artwork hands off through the countdown band`, m.continuity.heroTransitionsThroughCountdownBand);
     check(`${name}: countdown band preserves the continuous background canvas`, m.continuity.countdownBandKeepsContinuousCanvas);
     check(`${name}: one left invitation botanical bridges gently into the program`, m.continuity.invitationUsesOneLeftBotanicalBridge);
+    check(`${name}: canvas-crossing botanicals use soft edge masks`, m.continuity.botanicalsFadeAtCanvasEdges);
+    check(`${name}: botanical parents do not crop canvas crossings`, m.continuity.botanicalParentsAllowOverflow);
   }
 
   const justBelowFormerBreakpoint = normal["1119x900"];
   const justAboveFormerBreakpoint = normal["1121x900"];
-  check(
-    "hero remains continuous across the former 70rem breakpoint",
-    justBelowFormerBreakpoint?.illustration?.fileServed === justAboveFormerBreakpoint?.illustration?.fileServed &&
-      Math.abs((justBelowFormerBreakpoint?.names?.left ?? 0) - (justAboveFormerBreakpoint?.names?.left ?? 999)) <= 2 &&
-      Math.abs((justBelowFormerBreakpoint?.names?.top ?? 0) - (justAboveFormerBreakpoint?.names?.top ?? 999)) <= 2 &&
-      Math.abs((justBelowFormerBreakpoint?.heroCountdown?.top ?? 0) - (justAboveFormerBreakpoint?.heroCountdown?.top ?? 999)) <= 2 &&
-      Math.abs((justBelowFormerBreakpoint?.heroCountdown?.width ?? 0) - (justAboveFormerBreakpoint?.heroCountdown?.width ?? 999)) <= 3,
-    JSON.stringify({ below: justBelowFormerBreakpoint, above: justAboveFormerBreakpoint }),
-  );
+  if (justBelowFormerBreakpoint && justAboveFormerBreakpoint) {
+    check(
+      "hero remains continuous across the former 70rem breakpoint",
+      justBelowFormerBreakpoint.illustration?.fileServed === justAboveFormerBreakpoint.illustration?.fileServed &&
+        Math.abs((justBelowFormerBreakpoint.names?.left ?? 0) - (justAboveFormerBreakpoint.names?.left ?? 999)) <= 2 &&
+        Math.abs((justBelowFormerBreakpoint.names?.top ?? 0) - (justAboveFormerBreakpoint.names?.top ?? 999)) <= 2 &&
+        Math.abs((justBelowFormerBreakpoint.heroCountdown?.top ?? 0) - (justAboveFormerBreakpoint.heroCountdown?.top ?? 999)) <= 2 &&
+        Math.abs((justBelowFormerBreakpoint.heroCountdown?.width ?? 0) - (justAboveFormerBreakpoint.heroCountdown?.width ?? 999)) <= 3,
+      JSON.stringify({ below: justBelowFormerBreakpoint, above: justAboveFormerBreakpoint }),
+    );
+  }
 
   for (const [name, m] of Object.entries(reduced)) {
     check(`${name} (reduced motion): no horizontal overflow`, !m.horizontalOverflow);

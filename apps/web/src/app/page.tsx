@@ -8,9 +8,9 @@ import { BotanicalDrift } from "@/components/motion/Choreography";
 import { site } from "@/config/site";
 
 /**
- * One continuous invitation with two environmental states. Semantic sections
- * keep their navigation and accessibility boundaries, while the shared light
- * and evening canvases own the page background independently of those bounds.
+ * One continuous invitation with section-owned environmental states. Semantic
+ * sections retain their navigation and accessibility boundaries, while their
+ * canvases blend into the next scene instead of forming colour bands.
  */
 export default function Page() {
   return (

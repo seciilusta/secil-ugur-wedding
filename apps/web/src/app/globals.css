@@ -31,15 +31,19 @@
 
   /* Derived tones. Kept here so components never invent their own values. */
   --color-beige-deep: #ded2c4; /* lower half of the beige stretch          */
-  --color-olive-mist: #8d8d76; /* desaturated threshold between day/night */
+  --color-olive-mist: #aaa998; /* readable desaturated threshold before olive */
   --color-olive-deep: #414a3a; /* bottom of the RSVP section               */
+  --color-deep-espresso: #4e4036; /* warm threshold before the dark close  */
+  --color-date-accent: #6f563e; /* warm dark accent, readable on deep beige */
+  --color-light-line: #846b4d; /* warm structural line on paper and ivory  */
+  --color-hero-line: #80786d; /* quiet but visible over the opening paper  */
   --color-olive-line: #79826d; /* hairlines on olive                       */
   --color-on-olive: #eee9e0; /* body text on olive                         */
   /* Lightened from #c3c8b8, which measured 4.56:1 on olive. The olive band is
      a gradient, so the darkest sample is not the worst case and a token that
      close to the 4.5:1 floor has no room to spare. */
   --color-on-olive-muted: #cfd3c6; /* secondary text on olive              */
-  --color-on-dark-muted: #9a9490; /* secondary text on soft black          */
+  --color-on-dark-muted: #c9c2b9; /* readable from espresso through black  */
 
   /* -- Typography --------------------------------------------------------
      Bodoni Moda for the names and major headings, Jost for everything else.
@@ -219,56 +223,23 @@
     border-top: 1px solid color-mix(in srgb, var(--color-olive-line) 55%, transparent);
   }
 
-  /* ---- Shared environmental canvases ---------------------------------
-     Sections do not own full-width colour bands. The page has one paper
-     world through Venue and one evening world shared by RSVP and Footer.   */
+  /* ---- Section environmental canvases --------------------------------
+     Each semantic section owns a scene, but starts where the preceding scene
+     ends. Decorative layers are free to cross those seams.                 */
 
   .page-canvas {
     background: var(--color-paper);
   }
 
-  .light-experience {
+  .light-experience,
+  .evening-experience {
     position: relative;
     isolation: isolate;
-    background:
-      radial-gradient(ellipse at 84% 17%, color-mix(in srgb, var(--color-champagne) 10%, transparent), transparent 28%),
-      linear-gradient(
-        180deg,
-        var(--color-paper) 0%,
-        var(--color-ivory) 9%,
-        var(--color-beige) 32%,
-        color-mix(in srgb, var(--color-beige) 72%, var(--color-beige-deep)) 72%,
-        var(--color-beige-deep) 100%
-      );
+    background: transparent;
   }
 
   .evening-experience {
-    /* A compact dusk handoff: the RSVP arrives sooner after the venue while
-       retaining a visible beige-to-olive progression. */
-    --evening-arrival: clamp(18rem, 20vw, 22rem);
-    position: relative;
-    isolation: isolate;
     overflow: visible;
-    background: linear-gradient(
-      180deg,
-      var(--color-beige-deep) 0%,
-      color-mix(in srgb, var(--color-beige-deep) 76%, var(--color-olive-mist)) 7rem,
-      color-mix(in srgb, var(--color-beige-deep) 45%, var(--color-olive-mist)) 12rem,
-      var(--color-olive-mist) 16rem,
-      var(--color-olive) var(--evening-arrival),
-      var(--color-olive-deep) calc(var(--evening-arrival) + 28rem),
-      #343a30 calc(var(--evening-arrival) + 54rem),
-      var(--color-soft-black) 100%
-    );
-  }
-
-  .evening-experience::after {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    pointer-events: none;
-    background: none;
   }
 
   /* ---- RSVP form on the olive band -----------------------------------
@@ -447,8 +418,16 @@
   .hero-paper {
     z-index: -5;
     background:
-      radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--color-champagne) 20%, transparent), transparent 34%),
-      linear-gradient(125deg, var(--color-paper) 0%, var(--color-ivory) 34%, color-mix(in srgb, var(--color-beige) 78%, var(--color-paper)) 76%, var(--color-beige) 100%);
+      /* Resolve the art-directed paper into the exact opening tone of Davet
+         before the hero's soft bleed begins. This prevents a visible seam
+         when the semantic canvases hand off. */
+      linear-gradient(
+        to bottom,
+        transparent calc(100% - var(--hero-bleed) - clamp(7rem, 12vw, 11rem)),
+        var(--color-ivory) calc(100% - var(--hero-bleed)),
+        var(--color-ivory) 100%
+      ),
+      linear-gradient(180deg, var(--color-paper) 0%, var(--color-ivory) 62%, var(--color-ivory) 100%);
   }
 
   .hero-paper::after {
@@ -463,14 +442,14 @@
   .hero-light {
     z-index: -1;
     background:
+      /* This layer sits above the hero art and paper, so it can complete the
+         handoff even while those art-directed layers fade out below the fold. */
       linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--color-paper) 34%, transparent) 0%,
-        color-mix(in srgb, var(--color-paper) 17%, transparent) 26%,
-        color-mix(in srgb, var(--color-paper) 5%, transparent) 42%,
-        transparent 54%
-      ),
-      linear-gradient(0deg, color-mix(in srgb, var(--color-beige-deep) 72%, transparent) 0%, transparent 48%);
+        to bottom,
+        transparent calc(100% - var(--hero-bleed) - clamp(12rem, 18vw, 17rem)),
+        var(--color-ivory) calc(100% - var(--hero-bleed)),
+        var(--color-ivory) 100%
+      );
   }
 
   .hero-venue-art {
@@ -607,7 +586,7 @@
     font-weight: 500;
     letter-spacing: clamp(0.1em, 0.5vw, 0.16em);
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-charcoal) 54%, transparent);
+    color: color-mix(in srgb, var(--color-charcoal) 68%, transparent);
   }
 
   .hero-nav a::after {
@@ -619,7 +598,7 @@
     height: 1px;
     transform: scaleX(0);
     transform-origin: right;
-    background: var(--color-champagne);
+    background: var(--color-hero-line);
     transition: transform 500ms var(--ease-calm);
   }
 
@@ -767,8 +746,8 @@
   .countdown-fallback {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    border-top: 1px solid color-mix(in srgb, var(--color-charcoal) 25%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-charcoal) 18%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--color-hero-line) 74%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-hero-line) 60%, transparent);
   }
 
   .countdown-unit {
@@ -785,7 +764,7 @@
     bottom: 25%;
     left: 0;
     width: 1px;
-    background: color-mix(in srgb, var(--color-charcoal) 18%, transparent);
+    background: color-mix(in srgb, var(--color-hero-line) 60%, transparent);
   }
 
   .countdown-value {
@@ -845,7 +824,7 @@
     width: clamp(3rem, 7vw, 7rem);
     height: 1px;
     transform-origin: left;
-    background: color-mix(in srgb, var(--color-charcoal) 30%, transparent);
+    background: var(--color-hero-line);
     animation: hairline-drift-x 3.6s var(--ease-calm) infinite;
   }
 
@@ -875,7 +854,7 @@
     display: block;
     width: 1px;
     height: clamp(2.25rem, 4vw, 5rem);
-    background: color-mix(in srgb, var(--color-olive) 38%, transparent);
+    background: color-mix(in srgb, var(--color-hero-line) 76%, transparent);
   }
 
   .hero-vertical-date-line::after {
@@ -887,7 +866,7 @@
     height: 0.3rem;
     transform: translate(-50%, 50%);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--color-olive) 58%, transparent);
+    background: var(--color-hero-line);
   }
 
   @media (max-width: 53.999rem) {
@@ -1030,7 +1009,7 @@
     display: block;
     height: 1px;
     transform-origin: left;
-    background: var(--color-champagne);
+    background: var(--color-light-line);
   }
 
   .section-kicker-line {
@@ -1048,7 +1027,7 @@
     isolation: isolate;
     overflow: visible;
     padding-block: clamp(7.5rem, 11vw, 11rem) clamp(4rem, 5vw, 5rem);
-    background: radial-gradient(circle at 12% 46%, color-mix(in srgb, var(--color-champagne) 8%, transparent), transparent 31%);
+    background: linear-gradient(180deg, var(--color-ivory) 0%, color-mix(in srgb, var(--color-ivory) 42%, var(--color-beige)) 58%, var(--color-beige-deep) 100%);
   }
 
   .invitation-grid {
@@ -1097,6 +1076,8 @@
     opacity: 0.18;
     pointer-events: none;
     mix-blend-mode: multiply;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0 72%, rgb(0 0 0 / 70%) 86%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0 72%, rgb(0 0 0 / 70%) 86%, transparent 100%);
   }
 
   .invitation-botanical img,
@@ -1111,7 +1092,14 @@
     isolation: isolate;
     overflow: visible;
     padding-block: clamp(5rem, 7vw, 7rem) clamp(5.5rem, 7vw, 7rem);
-    background: radial-gradient(ellipse at 12% 42%, color-mix(in srgb, var(--color-beige) 16%, transparent), transparent 58%);
+    background: linear-gradient(180deg, var(--color-beige-deep) 0%, color-mix(in srgb, var(--color-beige-deep) 54%, var(--color-olive-mist)) 72%, var(--color-olive-mist) 100%);
+  }
+
+  /* Program lines carry the warm date accent, maintaining definition over
+     the beige-to-mist canvas without introducing a separate colour family. */
+  .wedding-day .editorial-line,
+  .timeline-progress {
+    background: var(--color-date-accent);
   }
 
   .wedding-day-grid {
@@ -1143,7 +1131,7 @@
     margin-left: clamp(4.8rem, 9vw, 8rem);
     font-size: clamp(2.2rem, 4vw, 4.2rem);
     font-style: italic;
-    color: var(--color-champagne);
+    color: var(--color-date-accent);
   }
 
   .wedding-day-date span:last-child {
@@ -1190,12 +1178,11 @@
   }
 
   .timeline-rail {
-    background: color-mix(in srgb, var(--color-charcoal) 18%, transparent);
+    background: color-mix(in srgb, var(--color-date-accent) 52%, transparent);
   }
 
   .timeline-progress {
     transform-origin: top;
-    background: var(--color-olive);
   }
 
   .timeline-stop {
@@ -1212,7 +1199,7 @@
     left: calc(clamp(3.5rem, 7vw, 6.5rem) * -1 - 0.4rem + 1.1rem);
     width: 0.78rem;
     height: 0.78rem;
-    border: 1px solid var(--color-olive);
+    border: 1px solid var(--color-date-accent);
     border-radius: 50%;
     background: var(--color-beige);
     box-shadow: 0 0 0 0.42rem color-mix(in srgb, var(--color-beige) 82%, transparent);
@@ -1228,7 +1215,7 @@
 
   .timeline-copy {
     padding-bottom: clamp(1.4rem, 3vw, 2.4rem);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-charcoal) 18%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-date-accent) 42%, transparent);
   }
 
   .timeline-copy h3 {
@@ -1248,7 +1235,15 @@
     isolation: isolate;
     overflow: visible;
     padding-block: clamp(7rem, 9vw, 9rem) clamp(5rem, 7vw, 7rem);
-    background: transparent;
+    /* Keep the readable mist behind venue copy; the final olive descent sits
+       in the lower, artwork-led part of the composition. */
+    background: linear-gradient(180deg, var(--color-olive-mist) 0%, color-mix(in srgb, var(--color-olive-mist) 70%, var(--color-olive)) 78%, var(--color-olive) 100%);
+  }
+
+  /* Venue lines switch to the established olive structural colour. It has
+     enough presence on olive-mist without competing with the venue artwork. */
+  .venue-composition .editorial-line {
+    background: var(--color-olive);
   }
 
   .venue-visual {
@@ -1349,7 +1344,7 @@
     align-items: center;
     gap: 0.75rem;
     margin-top: 2rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-charcoal) 38%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-olive) 74%, transparent);
     font-size: var(--text-fine);
     font-weight: 500;
     letter-spacing: 0.12em;
@@ -1435,15 +1430,15 @@
 
   .rsvp-composition {
     position: relative;
-    isolation: isolate;
     overflow: visible;
-    z-index: 1;
-    padding: calc(var(--evening-arrival) + clamp(4.5rem, 7vw, 7rem)) 0 clamp(7rem, 11vw, 10rem);
+    z-index: auto;
+    padding: clamp(7rem, 11vw, 10rem) 0 clamp(7rem, 11vw, 10rem);
+    background: linear-gradient(180deg, var(--color-olive) 0%, var(--color-olive-deep) 55%, var(--color-deep-espresso) 100%);
   }
 
   .rsvp-grid {
     position: relative;
-    z-index: 1;
+    z-index: 3;
     display: grid;
     grid-template-columns: minmax(16rem, 0.78fr) minmax(0, 1.22fr);
     gap: clamp(4rem, 10vw, 10rem);
@@ -1456,7 +1451,7 @@
   }
 
   .editorial-line-dark {
-    background: color-mix(in srgb, var(--color-champagne) 72%, transparent);
+    background: color-mix(in srgb, var(--color-on-olive-muted) 80%, transparent);
   }
 
   .rsvp-heading h2 {
@@ -1482,11 +1477,15 @@
 
   .evening-botanical {
     position: absolute;
-    z-index: 0;
-    opacity: 0.1;
-    filter: brightness(1.7) saturate(0.45);
+    z-index: 2;
+    /* Screen blending was brightening random areas of the dark canvas. Keep
+       the existing florals as a quiet texture instead of a light source. */
+    opacity: 0.055;
+    filter: brightness(0.82) saturate(0.38);
     pointer-events: none;
-    mix-blend-mode: screen;
+    mix-blend-mode: normal;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 78%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 78%, transparent 100%);
   }
 
   .evening-botanical-upper {
@@ -1500,7 +1499,7 @@
     bottom: clamp(2rem, 5vw, 6rem);
     left: -16rem;
     width: clamp(32rem, 48vw, 50rem);
-    opacity: 0.08;
+    opacity: 0.04;
   }
 
   .evening-botanical-lower img {
@@ -1509,13 +1508,15 @@
 
   .wedding-footer {
     position: relative;
-    z-index: 1;
+    z-index: auto;
     padding-block: clamp(4rem, 7vw, 6rem);
-    background: transparent;
+    background: linear-gradient(180deg, var(--color-deep-espresso) 0%, color-mix(in srgb, var(--color-deep-espresso) 56%, var(--color-soft-black)) 58%, var(--color-soft-black) 100%);
     color: var(--color-on-dark-muted);
   }
 
   .footer-grid {
+    position: relative;
+    z-index: 3;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 3rem;
@@ -1583,7 +1584,7 @@
     }
 
     .rsvp-composition {
-      padding: calc(var(--evening-arrival) + 4.5rem) 0 6rem;
+      padding: 6.5rem 0 6rem;
     }
 
     .invitation-grid,
