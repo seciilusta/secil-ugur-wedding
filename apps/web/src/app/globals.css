@@ -27,7 +27,6 @@
   --color-charcoal: #37332f;
   --color-soft-black: #242321;
   --color-amber: #b9783e;
-  --color-warm-border: #d8cec2;
 
   /* Derived tones. Kept here so components never invent their own values. */
   --color-beige-deep: #ded2c4; /* lower half of the beige stretch          */
@@ -62,9 +61,6 @@
   /* Fluid scale. The upper bounds are deliberately restrained so large
      headings can never push hero content off a short screen.              */
   --text-overline: 0.6875rem;
-  --text-overline--line-height: 1.1;
-  --text-overline--letter-spacing: 0.22em;
-
   /* Floor of 13px: this size carries button labels, field hints and validation
      messages, and 12px is too small for those on a phone. */
   --text-fine: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);
@@ -73,60 +69,30 @@
   --text-body: clamp(0.9375rem, 0.9rem + 0.25vw, 1.0625rem);
   --text-body--line-height: 1.75;
 
-  --text-lead: clamp(1.0625rem, 1rem + 0.5vw, 1.25rem);
-  --text-lead--line-height: 1.7;
-
   --text-quote: clamp(1.3125rem, 1.05rem + 1.35vw, 2.125rem);
   --text-quote--line-height: 1.42;
 
-  --text-detail: clamp(1.125rem, 1.05rem + 0.5vw, 1.5rem);
-  --text-detail--line-height: 1.3;
-
   --text-heading: clamp(1.625rem, 1.35rem + 1.5vw, 2.625rem);
-  --text-heading--line-height: 1.15;
-
-  /**
-   * Deliberately capped well below what the space would allow. "Seçil & Uğur"
-   * has to stay on one line from 320px upwards, and oversized type here would
-   * push the date, time and CTA below the fold on a short phone.
-   */
-  --text-names: clamp(2.625rem, 1.9rem + 4vw, 4.5rem);
-  --text-names--line-height: 1.04;
 
   --tracking-overline: 0.22em;
   --tracking-label: 0.14em;
   --tracking-wide: 0.06em;
-  --tracking-names: 0.005em;
 
   /* -- Spacing and layout -----------------------------------------------
-     One content width and one vertical rhythm for the whole page.         */
+     A shared gutter and content width keep every section aligned.         */
 
   --spacing-gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --spacing-section: clamp(4.5rem, 9vh + 3rem, 9rem);
-  --spacing-section-tight: clamp(3rem, 6vh + 2rem, 6rem);
-  --spacing-stack: clamp(1.5rem, 3vw, 2.75rem);
-
   --container-content: 76rem;
-  --container-reading: 44rem;
-
-  /**
-   * The hero switches from its vertical mobile hierarchy to the asymmetric
-   * desktop composition here rather than at Tailwind's `lg`. Below this width the
-   * left-hand text column is too narrow to hold the names on a single line.
-   */
-  --breakpoint-wide: 70rem;
 
   /* -- Shape ------------------------------------------------------------
      Minimal rounding only. No pills, no large rounded cards.              */
 
-  --radius-frame: 2px;
   --radius-field: 2px;
 
   /* -- Motion -----------------------------------------------------------
      Slow and elegant. Nothing bounces.                                    */
 
   --ease-calm: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --duration-reveal: 1100ms;
 }
 
 /* ==========================================================================
@@ -156,7 +122,7 @@
     color: var(--color-charcoal);
     font-family: var(--font-sans);
     font-size: var(--text-body);
-    line-height: 1.75;
+    line-height: var(--text-body--line-height);
     /* Nothing on this page is ever allowed to scroll sideways. */
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
@@ -212,17 +178,6 @@
     font-weight: 500;
   }
 
-  /* The fine architectural hairline used throughout the page. */
-  .rule {
-    border: 0;
-    border-top: 1px solid var(--color-warm-border);
-  }
-
-  .rule-on-olive {
-    border: 0;
-    border-top: 1px solid color-mix(in srgb, var(--color-olive-line) 55%, transparent);
-  }
-
   /* ---- Section environmental canvases --------------------------------
      Each semantic section owns a scene, but starts where the preceding scene
      ends. Decorative layers are free to cross those seams.                 */
@@ -235,11 +190,6 @@
   .evening-experience {
     position: relative;
     isolation: isolate;
-    background: transparent;
-  }
-
-  .evening-experience {
-    overflow: visible;
   }
 
   /* ---- RSVP form on the olive band -----------------------------------
@@ -303,15 +253,17 @@
     background-repeat: no-repeat;
   }
 
-  .field-hint {
+  .field-hint,
+  .field-error {
     margin-top: 0.5rem;
     font-size: var(--text-fine);
+  }
+
+  .field-hint {
     color: var(--color-on-olive-muted);
   }
 
   .field-error {
-    margin-top: 0.5rem;
-    font-size: var(--text-fine);
     color: #f0c9a4; /* amber, lightened to stay readable on olive */
   }
 
@@ -771,10 +723,6 @@
     transition: font-size 600ms var(--ease-calm);
   }
 
-  .hero-title span:last-child {
-    margin-left: 0;
-  }
-
   .hero-title i {
     justify-self: center;
     margin: -0.08em 0 -0.02em;
@@ -806,11 +754,6 @@
   .hero-date span,
   .hero-place span {
     display: block;
-  }
-
-  .hero-date span {
-    margin: 0;
-    color: inherit;
   }
 
   .hero-place {
@@ -1007,13 +950,7 @@
     }
 
     .hero-title i {
-      justify-self: center;
       margin: -0.06em 0 0;
-      font-size: 0.62em;
-    }
-
-    .hero-title span:last-child {
-      margin-left: 0;
     }
 
     .hero-details {
@@ -1160,9 +1097,6 @@
     }
 
     .hero-topbar {
-      top: 0;
-      right: 0;
-      left: 0;
       min-height: 2.7rem;
       padding-inline: var(--hero-content-left);
       padding-left: 0.75rem;
@@ -1265,7 +1199,6 @@
   .invitation-composition {
     position: relative;
     isolation: isolate;
-    overflow: visible;
     padding-block: clamp(7.5rem, 11vw, 11rem) clamp(4rem, 5vw, 5rem);
     background: linear-gradient(180deg, var(--color-ivory) 0%, color-mix(in srgb, var(--color-ivory) 42%, var(--color-beige)) 58%, var(--color-beige-deep) 100%);
   }
@@ -1330,7 +1263,6 @@
   .wedding-day {
     position: relative;
     isolation: isolate;
-    overflow: visible;
     padding-block: clamp(5rem, 7vw, 7rem) clamp(5.5rem, 7vw, 7rem);
     background: linear-gradient(
       180deg,
@@ -1491,7 +1423,6 @@
   .venue-composition {
     position: relative;
     isolation: isolate;
-    overflow: visible;
     padding-block: clamp(7rem, 9vw, 9rem) clamp(5rem, 7vw, 7rem);
     /* Keep the readable mist behind venue copy; the final olive descent sits
        in the lower, artwork-led part of the composition. */
@@ -1515,11 +1446,8 @@
     position: relative;
     isolation: isolate;
     width: calc(100% + var(--venue-right-bleed));
-    max-width: none;
     margin-right: calc(-1 * var(--venue-right-bleed));
-    margin-left: 0;
     transform-origin: right center;
-    opacity: 1;
   }
 
   .venue-art-crop::before {
@@ -1688,8 +1616,6 @@
 
   .rsvp-composition {
     position: relative;
-    overflow: visible;
-    z-index: auto;
     padding: clamp(7rem, 11vw, 10rem) 0 clamp(7rem, 11vw, 10rem);
     background: linear-gradient(180deg, var(--color-olive) 0%, var(--color-olive-deep) 55%, var(--color-deep-mocha) 100%);
   }
@@ -1766,7 +1692,6 @@
 
   .wedding-footer {
     position: relative;
-    z-index: auto;
     padding-block: clamp(4rem, 7vw, 6rem);
     background: linear-gradient(180deg, var(--color-deep-mocha) 0%, color-mix(in srgb, var(--color-deep-mocha) 56%, var(--color-soft-black)) 58%, var(--color-soft-black) 100%);
     color: var(--color-on-dark-muted);
@@ -1912,10 +1837,6 @@
       left: calc(-3.25rem - var(--timeline-icon-size) / 2 + 1.1rem);
     }
 
-    .venue-composition {
-      min-height: auto;
-    }
-
     .venue-visual {
       gap: 3rem;
       margin-top: 3rem;
@@ -1923,9 +1844,7 @@
 
     .venue-art-crop {
       width: calc(100% + var(--venue-right-bleed) + 1rem);
-      margin-right: calc(-1 * var(--venue-right-bleed));
       margin-left: -1rem;
-      opacity: 1;
     }
 
     .venue-art-crop img {
@@ -1976,24 +1895,9 @@
       text-align: left;
     }
   }
-
-  /* A single warm candlelit glow. Purely atmospheric, never over content. */
-  .candle-glow {
-    background: radial-gradient(
-      closest-side,
-      color-mix(in srgb, var(--color-amber) 20%, transparent),
-      transparent 100%
-    );
-  }
 }
 
 @layer utilities {
-  /* Names and short labels must not break across lines mid-word. */
-  .no-orphan {
-    text-wrap: balance;
-    hyphens: none;
-  }
-
   .text-pretty-tr {
     text-wrap: pretty;
     hyphens: none;
@@ -2003,20 +1907,6 @@
   .tap-target {
     min-height: 44px;
     min-width: 44px;
-  }
-
-  /**
-   * Hero height, most-supported unit last.
-   *
-   * `svh` is the one we actually want: it measures the viewport with the mobile
-   * browser chrome expanded, so the opening screen still holds the names, date,
-   * time, venue and CTA when Safari's toolbars are visible. `dvh` and `vh` are
-   * there for older engines that do not understand the newer units.
-   */
-  .hero-viewport {
-    min-height: 100vh;
-    min-height: 100dvh;
-    min-height: 100svh;
   }
 }
 
