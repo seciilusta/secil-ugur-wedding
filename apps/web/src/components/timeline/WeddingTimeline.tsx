@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { site } from "@/config/site";
 
 const EASE = [0.22, 0.61, 0.36, 1] as const;
+const MILESTONE_THRESHOLDS = [0.04, 0.31, 0.58, 0.84] as const;
 
 const iconVariants = {
   waiting: {
@@ -79,9 +80,10 @@ function TimelineStop({
   progress: MotionValue<number>;
   reduceMotion: boolean | null;
 }) {
-  // The rail starts and ends slightly inside the timeline, so each visual
-  // milestone sits just inside an evenly divided progress range.
-  const threshold = (index + 0.15) / (site.event.schedule.length - 0.7);
+  // The rail ends after the final milestone's copy, not at its centre. These
+  // calibrated points align each colour swap with the matching ring instead
+  // of making the final icon wait for the rail's empty tail to finish.
+  const threshold = MILESTONE_THRESHOLDS[index] ?? 1;
   const [hasProgressedPast, setHasProgressedPast] = useState(reduceMotion);
 
   useMotionValueEvent(progress, "change", (latest) => {

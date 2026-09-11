@@ -1,4 +1,4 @@
-import { Hero } from "@/components/sections/Hero";
+import { Hero, HeroHeader } from "@/components/sections/Hero";
 import { Invitation } from "@/components/sections/Invitation";
 import { EventDetails } from "@/components/sections/EventDetails";
 import { VenueMap } from "@/components/sections/VenueMap";
@@ -15,6 +15,7 @@ import { site } from "@/config/site";
 export default function Page() {
   return (
     <main className="page-canvas">
+      <HeroHeader />
       <div className="light-experience">
         <Hero />
         <Invitation />

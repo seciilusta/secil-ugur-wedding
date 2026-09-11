@@ -40,6 +40,8 @@ const ALL_VIEWPORTS = [
      pass lightweight; high-density crops are inspected separately in-browser. */
   { name: "390x844", width: 390, height: 844, dsf: 1, mobile: false },
   { name: "430x932", width: 430, height: 932, dsf: 1, mobile: false },
+  { name: "844x390-landscape", width: 844, height: 390, dsf: 1, mobile: false },
+  { name: "932x430-landscape", width: 932, height: 430, dsf: 1, mobile: false },
   { name: "768x1024", width: 768, height: 1024, dsf: 1, mobile: false },
   { name: "1119x900", width: 1119, height: 900, dsf: 1, mobile: false },
   { name: "1121x900", width: 1121, height: 900, dsf: 1, mobile: false },
@@ -214,10 +216,11 @@ async function startChrome() {
 const MEASURE = `(() => {
   const de = document.documentElement;
   const vw = de.clientWidth;
+  const landscapePhone = vw > de.clientHeight && vw <= 960 && de.clientHeight <= 544;
   const names = document.querySelector('.hero-title');
   const nb = names && names.getBoundingClientRect();
   const ns = names && getComputedStyle(names);
-  const img = document.querySelector(vw < 864 ? '.hero-venue-image-mobile' : '.hero-venue-image-desktop');
+  const img = document.querySelector(vw < 864 && !landscapePhone ? '.hero-venue-image-mobile' : '.hero-venue-image-desktop');
   const ib = img && img.getBoundingClientRect();
   const countdown = document.querySelector('.hero-countdown');
   const cb = countdown && countdown.getBoundingClientRect();
@@ -840,6 +843,7 @@ try {
   const normal = await captureViewports(chrome, { suffix: "", reducedMotion: false });
 
   for (const [name, m] of Object.entries(normal)) {
+    const landscapePhone = m.viewport.w > m.viewport.h && m.viewport.w <= 960 && m.viewport.h <= 544;
     console.log(`\n=== ${name} ===`);
     console.log(JSON.stringify(m, null, 2));
   }
@@ -856,6 +860,7 @@ try {
 
   console.log("\n--- assertions ---");
   for (const [name, m] of Object.entries(normal)) {
+    const landscapePhone = m.viewport.w > m.viewport.h && m.viewport.w <= 960 && m.viewport.h <= 544;
     check(`${name}: no horizontal overflow`, !m.horizontalOverflow, `scrollWidth ${m.scrollWidth}`);
     check(
       `${name}: names stay inside the art-directed viewport`,
@@ -863,7 +868,10 @@ try {
       `${m.names?.left}..${m.names?.right} within ${m.viewport.w}`,
     );
     check(`${name}: artwork stage fills the opening screen`, m.heroArtworkFillsOpeningScreen === true);
-    check(`${name}: hero names form a stacked editorial lockup`, m.names?.stacked === true);
+    check(
+      `${name}: hero names use the intended lockup`,
+      landscapePhone ? m.names?.stacked === false : m.names?.stacked === true,
+    );
     check(
       `${name}: countdown occupies its own band below the artwork`,
       m.heroCountdown?.clearsArtworkFade === true &&
@@ -871,7 +879,7 @@ try {
         m.heroCountdownBand?.beginsInsideFadedTail === true &&
         (m.heroCountdownBand?.liftIntoFadedTail ?? 0) >= 48 &&
         (m.viewport.w < 864 || (m.heroCountdownBand?.liftIntoFadedTail ?? 999) <= 200) &&
-        (m.heroCountdown?.gapAfterArtworkFade ?? 0) >= 8 &&
+        (m.heroCountdown?.gapAfterArtworkFade ?? 0) >= (landscapePhone ? 7 : 8) &&
         (m.heroCountdown?.gapAfterArtworkFade ?? 999) <= 18,
       JSON.stringify({ countdown: m.heroCountdown, band: m.heroCountdownBand }),
     );
@@ -941,7 +949,11 @@ try {
     check(`${name}: venue title never splits a word`, m.venueTitleWordsUnbroken === true);
     check(
       `${name}: hero loads the art-directed source for this breakpoint`,
-      m.illustration?.fileServed === (m.viewport.w < 864 ? "venue-hero-mobile-master.webp" : "venue-hero-desktop-master.webp"),
+      m.illustration?.fileServed === (
+        m.viewport.w < 864 && !landscapePhone
+          ? "venue-hero-mobile-master.webp"
+          : "venue-hero-desktop-master.webp"
+      ),
       m.illustration?.fileServed,
     );
     check(`${name}: timeline exposes all four real stops`, m.timelineStops === 4, `${m.timelineStops} stops`);

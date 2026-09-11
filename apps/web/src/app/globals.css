@@ -546,14 +546,103 @@
   }
 
   .hero-topbar {
-    position: absolute;
-    top: clamp(0.75rem, calc(1vh + 1.5vw), 2.75rem);
-    right: clamp(1.25rem, 3vw, 3.5rem);
-    left: clamp(1.25rem, 3vw, 3.5rem);
+    --header-canvas: var(--color-paper);
+    --header-ink: var(--color-charcoal);
+    --header-line: var(--color-hero-line);
+    position: fixed;
+    z-index: 30;
+    top: 0;
+    right: 0;
+    left: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
+    isolation: isolate;
+    min-height: 3.75rem;
+    padding: 0.18rem clamp(1.25rem, 3vw, 3.5rem);
+    border-bottom: 1px solid color-mix(in srgb, var(--header-line) 38%, transparent);
+    /* This opaque-enough base is intentional: it keeps the glass consistent
+       over the light paper and the late-page dark canvases, and it prevents
+       Safari's stronger backdrop rendering from looking unlike Chrome. */
+    background:
+      linear-gradient(112deg, rgb(255 255 255 / 20%) 0%, transparent 42%, rgb(198 176 138 / 6%) 100%),
+      color-mix(in srgb, var(--header-canvas) 88%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 48%),
+      inset 0 -1px 0 rgb(76 85 68 / 7%),
+      0 0.45rem 1.25rem rgb(58 52 46 / 10%);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    transition:
+      background 80ms linear,
+      border-color 180ms var(--ease-calm),
+      box-shadow 180ms var(--ease-calm);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .hero-topbar {
+      background: var(--header-canvas);
+    }
+  }
+
+  html[data-header-tone="invitation"] .hero-topbar {
+    --header-canvas: color-mix(
+      in srgb,
+      var(--color-ivory) var(--header-invitation-ivory, 100%),
+      var(--color-beige-deep)
+    );
+  }
+
+  html[data-header-tone="program"] .hero-topbar {
+    /* The percentage is updated from the Program canvas's scroll position,
+       so the fixed header follows its beige-to-olive transition instead of
+       waiting for the next semantic section. */
+    --header-canvas: color-mix(
+      in srgb,
+      var(--color-beige-deep) var(--header-program-beige, 100%),
+      var(--color-olive-mist)
+    );
+    --header-line: var(--color-date-accent);
+  }
+
+  html[data-header-tone="venue"] .hero-topbar {
+    --header-canvas: color-mix(
+      in srgb,
+      var(--color-olive-mist) var(--header-venue-mist, 100%),
+      var(--color-olive)
+    );
+    --header-line: var(--color-olive-line);
+  }
+
+  html[data-header-tone="rsvp-olive"] .hero-topbar {
+    --header-canvas: color-mix(
+      in srgb,
+      var(--color-olive) var(--header-rsvp-leading, 100%),
+      var(--color-olive-deep)
+    );
+    --header-ink: var(--color-on-olive);
+    --header-line: var(--color-on-olive-muted);
+  }
+
+  html[data-header-tone="rsvp-mocha"] .hero-topbar {
+    --header-canvas: color-mix(
+      in srgb,
+      var(--color-olive-deep) var(--header-rsvp-leading, 100%),
+      var(--color-deep-mocha)
+    );
+    --header-ink: var(--color-on-olive);
+    --header-line: var(--color-on-olive-muted);
+  }
+
+  html[data-header-tone="footer"] .hero-topbar {
+    --header-canvas: color-mix(
+      in srgb,
+      var(--color-deep-mocha) var(--header-footer-mocha, 100%),
+      var(--color-soft-black)
+    );
+    --header-ink: var(--color-on-dark-muted);
+    --header-line: var(--color-on-dark-muted);
   }
 
   .hero-monogram a {
@@ -564,13 +653,15 @@
     font-family: var(--font-display);
     font-size: 0.95rem;
     letter-spacing: 0.03em;
-    color: color-mix(in srgb, var(--color-olive) 68%, transparent);
+    color: color-mix(in srgb, var(--header-ink) 80%, transparent);
+    transition: color 180ms var(--ease-calm);
   }
 
   .hero-nav {
     position: absolute;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
     gap: clamp(0.75rem, 5vw, 5.5rem);
@@ -586,7 +677,8 @@
     font-weight: 500;
     letter-spacing: clamp(0.1em, 0.5vw, 0.16em);
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-charcoal) 68%, transparent);
+    color: color-mix(in srgb, var(--header-ink) 78%, transparent);
+    transition: color 180ms var(--ease-calm);
   }
 
   .hero-nav a::after {
@@ -598,8 +690,10 @@
     height: 1px;
     transform: scaleX(0);
     transform-origin: right;
-    background: var(--color-hero-line);
-    transition: transform 500ms var(--ease-calm);
+    background: var(--header-line);
+    transition:
+      transform 500ms var(--ease-calm),
+      background-color 180ms var(--ease-calm);
   }
 
   .hero-nav a:hover::after,
@@ -889,7 +983,18 @@
     }
 
     .hero-venue-image-mobile {
+      /* The artwork begins directly beneath the header. Its natural
+         watercolor whitespace keeps the copy legible without a second,
+         accidental-looking fade above the greenhouse. */
       transform: translate(1vw, 8svh) scale(1.05);
+    }
+
+    .hero-copy {
+      top: clamp(5.75rem, calc(6svh + 7vw), 7rem);
+    }
+
+    .hero-title {
+      font-size: clamp(3.55rem, 15vw, 4.1rem);
     }
 
     .hero-monogram a {
@@ -912,6 +1017,7 @@
     }
 
     .hero-details {
+      margin-top: 1rem;
       letter-spacing: 0.14em;
     }
 
@@ -1000,6 +1106,121 @@
 
     .hero-venue-image-mobile {
       transform: translate(3vw, 20svh) scale(1.12);
+    }
+  }
+
+  /* On short portrait phones, moving the artwork below the venue copy needs
+     actual canvas height. Without it the art is simply clipped at the fold. */
+  @media (max-width: 48rem) and (max-height: 44rem) and (orientation: portrait) {
+    .hero-artwork {
+      --hero-stage-height: max(100svh, 48rem);
+    }
+  }
+
+  /* A phone in landscape is wide enough to otherwise select the tablet hero,
+     but it has far less vertical room than either the tablet or portrait-mobile
+     compositions. Keep the opening legible as a compact horizontal lockup. */
+  @media (orientation: landscape) and (max-width: 60rem) and (max-height: 34rem) {
+    .hero-artwork {
+      --hero-bleed: 6rem;
+      --hero-art-fade: 2.5rem;
+      --hero-countdown-lift: 6rem;
+      --hero-content-left: clamp(1.25rem, 5vw, 3.5rem);
+      --hero-content-right: clamp(1.25rem, 5vw, 3.5rem);
+    }
+
+    .hero-venue-image-desktop {
+      opacity: 1;
+      transform: none;
+    }
+
+    .hero-venue-image-mobile {
+      opacity: 0;
+    }
+
+    .hero-topbar {
+      top: 0;
+      right: 0;
+      left: 0;
+      min-height: 2.7rem;
+      padding-inline: var(--hero-content-left);
+    }
+
+    .hero-nav {
+      gap: clamp(0.7rem, 3vw, 1.75rem);
+    }
+
+    .hero-nav a {
+      min-height: 34px;
+      font-size: 0.5rem;
+      letter-spacing: 0.11em;
+    }
+
+    .hero-copy {
+      top: clamp(3rem, 14svh, 4.5rem);
+      width: min(48%, 25rem);
+    }
+
+    .hero-title {
+      display: flex;
+      align-items: center;
+      gap: 0.08em;
+      font-size: clamp(3.15rem, 6vw, 4.25rem);
+      line-height: 0.9;
+      text-wrap: nowrap;
+    }
+
+    .hero-title i {
+      margin: 0;
+      font-size: 0.52em;
+    }
+
+    .hero-details {
+      width: 100%;
+      margin-top: 1rem;
+      font-size: 0.56rem;
+      line-height: 1.45;
+      letter-spacing: 0.12em;
+    }
+
+    .hero-place {
+      margin-top: 0.3rem;
+    }
+
+    .hero-vertical-date {
+      display: none;
+    }
+
+    .hero-countdown-band {
+      gap: 0.35rem;
+      padding-block: 0.45rem 1.25rem;
+    }
+
+    .hero-countdown-overline {
+      margin-bottom: 0.2rem;
+      font-size: 0.48rem;
+    }
+
+    .countdown-unit {
+      gap: 0.15rem;
+      padding-block: 0.4rem;
+    }
+
+    .countdown-value {
+      font-size: clamp(1.1rem, 2.6vw, 1.45rem);
+    }
+
+    .countdown-label {
+      font-size: 0.42rem;
+    }
+
+    .hero-scroll a {
+      min-height: 1.8rem;
+      font-size: 0.52rem;
+    }
+
+    .hero-scroll-line {
+      width: 3rem;
     }
   }
 

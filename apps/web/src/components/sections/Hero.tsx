@@ -1,6 +1,33 @@
+import Link from "next/link";
+
 import { Countdown } from "@/components/hero/Countdown";
+import { HeaderTone } from "@/components/hero/HeaderTone";
 import { BotanicalDrift, EntranceMotion } from "@/components/motion/Choreography";
 import { site } from "@/config/site";
+
+export function HeroHeader() {
+  const { couple, hero } = site;
+
+  return (
+    <header className="hero-topbar">
+      <HeaderTone />
+      <EntranceMotion entrance="from-left" trigger="mount" className="hero-monogram">
+        <Link href="/" aria-label={`${couple.combined} ana sayfa`}>
+          {couple.monogram}
+        </Link>
+      </EntranceMotion>
+
+      <EntranceMotion entrance="hero-nav" trigger="mount" delay={0.06}>
+        <nav aria-label="Sayfa bölümleri" className="hero-nav">
+          <a href="#davet">{hero.navigation.invitation}</a>
+          <a href="#program">{hero.navigation.weddingDay}</a>
+          <a href="#mekan">{hero.navigation.venue}</a>
+          <a href="#katilim">{hero.navigation.rsvp}</a>
+        </nav>
+      </EntranceMotion>
+    </header>
+  );
+}
 
 export function Hero() {
   const { couple, event, venue, hero, artwork } = site;
@@ -40,23 +67,6 @@ export function Hero() {
         <img src={artwork.botanical} alt={artwork.botanicalAlt} width="900" height="1350" decoding="async" />
       </BotanicalDrift>
       <div className="hero-shell">
-        <header className="hero-topbar">
-          <EntranceMotion entrance="from-left" trigger="mount" className="hero-monogram">
-            <a href="#davet" aria-label={`${couple.combined} davetiyesi`}>
-              {couple.monogram}
-            </a>
-          </EntranceMotion>
-
-          <EntranceMotion entrance="hero-meta" trigger="mount" delay={0.12}>
-            <nav aria-label="Sayfa bölümleri" className="hero-nav">
-              <a href="#davet">{hero.navigation.invitation}</a>
-              <a href="#program">{hero.navigation.weddingDay}</a>
-              <a href="#mekan">{hero.navigation.venue}</a>
-              <a href="#katilim">{hero.navigation.rsvp}</a>
-            </nav>
-          </EntranceMotion>
-        </header>
-
         <div className="hero-copy">
           <EntranceMotion entrance="from-left" trigger="mount" delay={0.12}>
             <p className="hero-overline">{hero.overline}</p>
