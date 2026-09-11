@@ -6,7 +6,7 @@ import { BotanicalDrift, EntranceMotion } from "@/components/motion/Choreography
 import { site } from "@/config/site";
 
 export function HeroHeader() {
-  const { couple, hero } = site;
+  const { couple, event, hero } = site;
 
   return (
     <header className="hero-topbar">
@@ -24,6 +24,12 @@ export function HeroHeader() {
           <a href="#mekan">{hero.navigation.venue}</a>
           <a href="#katilim">{hero.navigation.rsvp}</a>
         </nav>
+      </EntranceMotion>
+
+      <EntranceMotion entrance="from-right" trigger="mount" delay={0.12} className="hero-header-date">
+        <time dateTime={event.isoDate} aria-label={event.date}>
+          {event.shortDate}
+        </time>
       </EntranceMotion>
     </header>
   );

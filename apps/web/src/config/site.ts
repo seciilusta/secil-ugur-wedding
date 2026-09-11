@@ -25,6 +25,8 @@ export const site = {
   event: {
     /** Human-readable date, exactly as it should appear on the page. */
     date: "4 Ekim 2026",
+    /** Compact numeric date used in the fixed header. */
+    shortDate: "04 · 10 · 26",
     /** Day of the week. */
     day: "Pazar",
     /** Machine-readable date for <time datetime="…">. */

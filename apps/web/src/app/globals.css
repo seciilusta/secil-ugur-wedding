@@ -561,6 +561,7 @@
     isolation: isolate;
     min-height: 3.75rem;
     padding: 0.18rem clamp(1.25rem, 3vw, 3.5rem);
+    padding-left: clamp(0.5rem, 1.75vw, 2.25rem);
     border-bottom: 1px solid color-mix(in srgb, var(--header-line) 38%, transparent);
     /* This opaque-enough base is intentional: it keeps the glass consistent
        over the light paper and the late-page dark canvases, and it prevents
@@ -657,6 +658,19 @@
     transition: color 180ms var(--ease-calm);
   }
 
+  .hero-header-date {
+    display: flex;
+    min-width: 6.75rem;
+    min-height: 44px;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 0.61rem;
+    font-weight: 400;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--header-ink) 72%, transparent);
+    transition: color 180ms var(--ease-calm);
+  }
+
   .hero-nav {
     position: absolute;
     top: 50%;
@@ -664,7 +678,7 @@
     transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
-    gap: clamp(0.75rem, 5vw, 5.5rem);
+    gap: clamp(0.6rem, 2.5vw, 2.75rem);
     white-space: nowrap;
   }
 
@@ -899,27 +913,7 @@
   }
 
   .hero-scroll {
-    position: relative;
-    margin-left: var(--hero-content-left);
-  }
-
-  .hero-scroll a {
-    display: inline-flex;
-    min-height: clamp(2rem, 3vw, 2.75rem);
-    align-items: center;
-    gap: 1rem;
-    font-size: 0.61rem;
-    letter-spacing: 0.19em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-charcoal) 58%, transparent);
-  }
-
-  .hero-scroll-line {
-    width: clamp(3rem, 7vw, 7rem);
-    height: 1px;
-    transform-origin: left;
-    background: var(--color-hero-line);
-    animation: hairline-drift-x 3.6s var(--ease-calm) infinite;
+    display: none;
   }
 
   .hero-vertical-date {
@@ -1001,6 +995,12 @@
       font-size: 1rem;
     }
 
+    .hero-header-date {
+      min-width: 5.5rem;
+      font-size: 0.54rem;
+      letter-spacing: 0.1em;
+    }
+
     .hero-nav a {
       min-height: 40px;
       font-size: 0.58rem;
@@ -1030,10 +1030,6 @@
       letter-spacing: 0.1em;
     }
 
-    .hero-scroll {
-      transform: none;
-    }
-
     .hero-vertical-date {
       right: var(--spacing-gutter);
       letter-spacing: 0.1em;
@@ -1048,6 +1044,31 @@
   }
 
   @media (max-width: 32rem) {
+    .hero-scroll {
+      display: block;
+      position: relative;
+      margin-left: var(--hero-content-left);
+    }
+
+    .hero-scroll a {
+      display: inline-flex;
+      min-height: 1.8rem;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.52rem;
+      letter-spacing: 0.19em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--color-charcoal) 58%, transparent);
+    }
+
+    .hero-scroll-line {
+      width: 3rem;
+      height: 1px;
+      transform-origin: left;
+      background: var(--color-hero-line);
+      animation: scroll-line-reveal 1.4s var(--ease-calm) 0.8s forwards;
+    }
+
     .hero-venue-image-mobile {
       transform: translate(3vw, 8svh) scale(1.23);
     }
@@ -1144,6 +1165,7 @@
       left: 0;
       min-height: 2.7rem;
       padding-inline: var(--hero-content-left);
+      padding-left: 0.75rem;
     }
 
     .hero-nav {
@@ -1154,6 +1176,11 @@
       min-height: 34px;
       font-size: 0.5rem;
       letter-spacing: 0.11em;
+    }
+
+    .hero-header-date {
+      min-height: 34px;
+      font-size: 0.5rem;
     }
 
     .hero-copy {
@@ -1214,14 +1241,6 @@
       font-size: 0.42rem;
     }
 
-    .hero-scroll a {
-      min-height: 1.8rem;
-      font-size: 0.52rem;
-    }
-
-    .hero-scroll-line {
-      width: 3rem;
-    }
   }
 
   /* ---- Editorial section choreography ------------------------------- */
@@ -2001,38 +2020,20 @@
   }
 }
 
-/* The scroll indicator hairline, drawn vertically on mobile and horizontally on
-   desktop. Slow enough to read as breathing rather than as movement. */
-@keyframes hairline-drift-y {
-  0%,
-  100% {
-    transform: scaleY(0.35);
-    opacity: 0.4;
+/* The scroll indicator reveals once from the text outward on every viewport. */
+@keyframes scroll-line-reveal {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
   }
-  50% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-@keyframes hairline-drift-x {
-  0%,
-  100% {
-    transform: scaleX(0.35);
-    opacity: 0.4;
-  }
-  50% {
+  70% {
     transform: scaleX(1);
     opacity: 1;
   }
-}
-
-@utility hairline-pulse-y {
-  animation: hairline-drift-y 3.6s var(--ease-calm) infinite;
-}
-
-@utility hairline-pulse-x {
-  animation: hairline-drift-x 3.6s var(--ease-calm) infinite;
+  100% {
+    transform: scaleX(1);
+    opacity: 0.65;
+  }
 }
 
 /* Anyone who asked for less motion gets a still page, not a slower one. */
