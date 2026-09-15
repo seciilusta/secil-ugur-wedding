@@ -224,13 +224,13 @@ export const site = {
    */
 
   maps: {
-    // Aden Boğazköy Tesisleri: 41.161347, 28.775932.
+    // Aden Boğazköy Tesisleri: 41.161346, 28.7763572.
     // Keep every map provider pointed at the same verified venue coordinate.
-    embedUrl: "https://www.google.com/maps?q=41.161347,28.775932&z=16&output=embed",
-    directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=41.161347,28.775932",
+    embedUrl: "https://www.google.com/maps?q=41.161346,28.7763572&z=16&output=embed",
+    directionsUrl: "https://maps.app.goo.gl/1fGw2y4dHsy1iRBs9",
     appDirections: {
-      appleMaps: "https://maps.apple.com/?daddr=41.161347,28.775932&dirflg=d",
-      googleMaps: "https://www.google.com/maps/dir/?api=1&destination=41.161347,28.775932"
+      appleMaps: "https://maps.apple.com/?daddr=41.161346,28.7763572&dirflg=d",
+      googleMaps: "https://maps.app.goo.gl/1fGw2y4dHsy1iRBs9"
     },
   },
 
