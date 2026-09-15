@@ -1,6 +1,30 @@
 import type { Metadata, Viewport } from "next";
+import { Bodoni_Moda, Jost, Parisienne } from "next/font/google";
 import { site } from "@/config/site";
 import "./globals.css";
+
+const displayFont = Bodoni_Moda({
+  variable: "--font-bodoni",
+  subsets: ["latin-ext"],
+  weight: "variable",
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const sansFont = Jost({
+  variable: "--font-jost",
+  subsets: ["latin-ext"],
+  weight: "variable",
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const scriptFont = Parisienne({
+  variable: "--font-parisienne",
+  subsets: ["latin-ext"],
+  weight: "400",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: site.metadata.title,
@@ -52,7 +76,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr">
+    <html
+      lang="tr"
+      className={`${displayFont.variable} ${sansFont.variable} ${scriptFont.variable}`}
+    >
       <body>
         {/*
           Scroll-revealed sections are prerendered with an inline `opacity: 0`

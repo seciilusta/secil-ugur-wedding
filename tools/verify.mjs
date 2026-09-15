@@ -38,6 +38,7 @@ const SECTION_IDS = (process.env.VERIFY_SECTIONS ?? "davet,program,mekan,katilim
 const ALL_VIEWPORTS = [
   /* Layout assertions care about CSS pixels. A 1x capture keeps the automated
      pass lightweight; high-density crops are inspected separately in-browser. */
+  { name: "375x812", width: 375, height: 812, dsf: 1, mobile: false },
   { name: "390x844", width: 390, height: 844, dsf: 1, mobile: false },
   { name: "430x932", width: 430, height: 932, dsf: 1, mobile: false },
   { name: "844x390-landscape", width: 844, height: 390, dsf: 1, mobile: false },
@@ -45,6 +46,7 @@ const ALL_VIEWPORTS = [
   { name: "768x1024", width: 768, height: 1024, dsf: 1, mobile: false },
   { name: "1119x900", width: 1119, height: 900, dsf: 1, mobile: false },
   { name: "1121x900", width: 1121, height: 900, dsf: 1, mobile: false },
+  { name: "1280x800", width: 1280, height: 800, dsf: 1, mobile: false },
   { name: "1366x768", width: 1366, height: 768, dsf: 1, mobile: false },
   { name: "1440x900", width: 1440, height: 900, dsf: 1, mobile: false },
   { name: "1920x1080", width: 1920, height: 1080, dsf: 1, mobile: false },
@@ -236,6 +238,9 @@ const MEASURE = `(() => {
   const venueDetailFrame = document.querySelector('#mekan .venue-art-crop');
   const vdfb = venueDetailFrame && venueDetailFrame.getBoundingClientRect();
   const venueDetailStyle = venueDetail && getComputedStyle(venueDetail);
+  const invitationPortrait = document.querySelector('#davet .invitation-portrait img');
+  const ipb = invitationPortrait && invitationPortrait.getBoundingClientRect();
+  const invitationPortraitStyle = invitationPortrait && getComputedStyle(invitationPortrait);
   const venueCopy = document.querySelector('#mekan .venue-copy');
   const vcb = venueCopy && venueCopy.getBoundingClientRect();
   const venueTitle = document.querySelector('#mekan .venue-copy h2');
@@ -313,6 +318,14 @@ const MEASURE = `(() => {
       containedInFrame: Boolean(vdfb && vdb.left >= vdfb.left - 1 && vdb.right <= vdfb.right + 1),
       featheredSides: venueDetailStyle?.maskImage !== 'none',
       fadesOnMultipleEdges: (venueDetailStyle?.maskImage.match(/linear-gradient/g) || []).length >= 2,
+    },
+    invitationPortrait: ipb && {
+      w: Math.round(ipb.width), h: Math.round(ipb.height),
+      aspect: Number((ipb.width / ipb.height).toFixed(3)),
+      pctOfViewportWidth: Math.round(ipb.width / vw * 100),
+      fadesOnAllEdges: (invitationPortraitStyle?.maskImage.match(/linear-gradient/g) || []).length >= 2 &&
+        invitationPortraitStyle?.maskComposite !== 'add',
+      maskComposite: invitationPortraitStyle?.maskComposite ?? null,
     },
     venueMapPanelPresent: Boolean(document.querySelector('#mekan .venue-map, #mekan iframe')),
     venueTitleHasEditorialLine: Boolean(document.querySelector('#mekan .editorial-line')),
@@ -394,10 +407,13 @@ const CONTINUITY_PROBE = `(() => {
   const heroArtwork = rect('.hero-venue-art');
   const countdownBand = rect('.hero-countdown-band');
   const heroPaperStyle = document.querySelector('.hero-paper') && getComputedStyle(document.querySelector('.hero-paper'));
+  const heroLightStyle = document.querySelector('.hero-light') && getComputedStyle(document.querySelector('.hero-light'));
   const heroArtworkStyle = document.querySelector('.hero-venue-art') && getComputedStyle(document.querySelector('.hero-venue-art'));
   const countdownBandStyle = document.querySelector('.hero-countdown-band') && getComputedStyle(document.querySelector('.hero-countdown-band'));
   const invitation = rect('#davet');
   const program = rect('#program');
+  const invitationBackground = getComputedStyle(document.querySelector('#davet')).backgroundImage;
+  const programBackground = getComputedStyle(document.querySelector('#program')).backgroundImage;
   const invitationBotanicals = [...document.querySelectorAll('.invitation-botanical')].map((el) => {
     const box = el.getBoundingClientRect();
     return {
@@ -448,6 +464,14 @@ const CONTINUITY_PROBE = `(() => {
       countdownBandStyle?.backgroundImage === 'none',
     ),
     invitationUsesOneLeftBotanicalBridge,
+    heroAndInvitationShareWarmHandoff:
+      heroPaperStyle?.backgroundImage.includes('rgb(244, 240, 233)') &&
+      heroLightStyle?.backgroundImage.includes('rgb(244, 240, 233)') &&
+      invitationBackground.includes('rgb(244, 240, 233) 0px'),
+    invitationUsesArtworkPaperTone: invitationBackground.includes('rgb(235, 225, 211)'),
+    invitationEndsAtProgramStart:
+      invitationBackground.includes('rgb(222, 210, 196) 100%') &&
+      programBackground.includes('rgb(222, 210, 196) 0px'),
     botanicalsFadeAtCanvasEdges,
     botanicalParentsAllowOverflow,
   };
@@ -920,6 +944,12 @@ try {
       `${m.venueDetail?.fileServed ?? "missing detail"}; map panel ${m.venueMapPanelPresent}`,
     );
     check(
+      `${name}: couple artwork preserves its full composition with a four-edge fade`,
+      Math.abs((m.invitationPortrait?.aspect ?? 0) - (1738 / 1224)) <= 0.01 &&
+        m.invitationPortrait?.fadesOnAllEdges === true,
+      JSON.stringify(m.invitationPortrait),
+    );
+    check(
       `${name}: venue artwork keeps its full aspect ratio inside a feathered frame`,
       Math.abs((m.venueDetail?.aspect ?? 0) - 1.5) <= 0.01 &&
         m.venueDetail?.containedInFrame === true &&
@@ -992,7 +1022,10 @@ try {
     check(`${name}: venue clears incoming evening artwork`, m.continuity.venueClearsIncomingEveningArtwork);
     check(`${name}: hero artwork hands off through the countdown band`, m.continuity.heroTransitionsThroughCountdownBand);
     check(`${name}: countdown band preserves the continuous background canvas`, m.continuity.countdownBandKeepsContinuousCanvas);
+    check(`${name}: hero tail and invitation share the warm handoff tone`, m.continuity.heroAndInvitationShareWarmHandoff);
     check(`${name}: one left invitation botanical bridges gently into the program`, m.continuity.invitationUsesOneLeftBotanicalBridge);
+    check(`${name}: invitation uses the sampled artwork paper tone`, m.continuity.invitationUsesArtworkPaperTone);
+    check(`${name}: invitation ends at the exact colour that starts the program`, m.continuity.invitationEndsAtProgramStart);
     check(`${name}: canvas-crossing botanicals use soft edge masks`, m.continuity.botanicalsFadeAtCanvasEdges);
     check(`${name}: botanical parents do not crop canvas crossings`, m.continuity.botanicalParentsAllowOverflow);
   }

@@ -42,10 +42,10 @@ export const site = {
     countdownTarget: "2026-10-04T18:30:00+03:00",
     celebrationEnd: "2026-10-05T00:00:00+03:00",
     schedule: [
-      { time: "19.00", label: "Karşılama", detail: "Bahçede ilk buluşma" },
-      { time: "19.30", label: "Nikâh", detail: "Birlikte söyleyeceğimiz evet" },
-      { time: "20.00", label: "İkram", detail: "Sofrada paylaşacağımız tatlar" },
-      { time: "21.00", label: "Eğlence", detail: "Müzik, dans ve kutlama" },
+      { time: "19.00", label: "Kokteyl", detail: "" },
+      { time: "19.30", label: "Nikâh", detail: "" },
+      { time: "20.00", label: "İkram", detail: "" },
+      { time: "21.00", label: "Eğlence", detail: "" },
     ],
   },
 
@@ -85,6 +85,12 @@ export const site = {
       src: "/artwork/venue-interior-approved.png",
       width: 1536,
       height: 1024,
+    },
+    couplePortrait: {
+      src: "/artwork/secil-ugur-editorial-portrait.png",
+      width: 1738,
+      height: 1224,
+      alt: "Seçil ve Uğur'un düğün illüstrasyonu",
     },
     illustrationAlt:
       "Aden Boğazköy Tesisleri'nin iç mekânını, avizeleri, tavan drapelerini ve çiçekli koridorunu gösteren suluboya illüstrasyon",
@@ -144,7 +150,7 @@ export const site = {
     overline: "Katılım",
     heading: "Bizimle Olacak mısınız?",
     intro:
-      "Hazırlıklarımızı tamamlayabilmemiz için katılım durumunuzu 20 Eylül 2026 tarihine kadar bildirmenizi rica ederiz.",
+      "Hazırlıklarımızı tamamlayabilmemiz için katılım durumunuzu 25 Eylül 2026 tarihine kadar bildirmenizi rica ederiz.",
 
     /**
      * Maximum guest count offered immediately while the form fetches the same
@@ -224,8 +230,7 @@ export const site = {
     directionsUrl: "https://www.google.com/maps/dir/?api=1&destination=41.161347,28.775932",
     appDirections: {
       appleMaps: "https://maps.apple.com/?daddr=41.161347,28.775932&dirflg=d",
-      googleMaps: "https://www.google.com/maps/dir/?api=1&destination=41.161347,28.775932",
-      waze: "https://www.waze.com/ul?ll=41.161347%2C28.775932&navigate=yes",
+      googleMaps: "https://www.google.com/maps/dir/?api=1&destination=41.161347,28.775932"
     },
   },
 

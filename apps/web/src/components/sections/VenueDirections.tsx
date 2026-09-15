@@ -9,7 +9,6 @@ type VenueDirectionsProps = {
   appLinks: {
     appleMaps: string;
     googleMaps: string;
-    waze: string;
   };
 };
 
@@ -57,9 +56,6 @@ export function VenueDirections({ href, label, appLinks }: VenueDirectionsProps)
             </a>
             <a href={appLinks.googleMaps} target="_blank" rel="noopener noreferrer" onClick={closeChooser}>
               Google Maps <span aria-hidden>↗</span>
-            </a>
-            <a href={appLinks.waze} target="_blank" rel="noopener noreferrer" onClick={closeChooser}>
-              Waze <span aria-hidden>↗</span>
             </a>
           </div>
         </div>
